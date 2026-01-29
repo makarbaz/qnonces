@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Qnonce – Non-Cloneable QR Code Security</title>
+  <meta name="description" content="Qnonce provides non-cloneable QR codes to prevent counterfeiting and protect brands. Secure, one-time use QR codes for pharma, FMCG, and food industries." />
+  <meta name="keywords" content="non-cloneable QR code, secure QR code, anti-fake QR code, one-time use QR, product authentication, brand protection QR" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      background: linear-gradient(135deg, #0b1f3a 0%, #1a3a5c 100%);
+      color: #222; 
+      overflow-x: hidden;
+    }
+    
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-20px); }
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    
+    @keyframes shimmer {
+      0% { background-position: -1000px 0; }
+      100% { background-position: 1000px 0; }
+    }
+    
+    @keyframes scanLine {
+      0%, 100% { transform: translateY(-100%); opacity: 0; }
+      50% { opacity: 1; }
+      100% { transform: translateY(200%); }
+    }
+    
+    @keyframes rotate3d {
+      0% { transform: rotateY(0deg) rotateX(0deg); }
+      50% { transform: rotateY(180deg) rotateX(10deg); }
+      100% { transform: rotateY(360deg) rotateX(0deg); }
+    }
+    
+    @keyframes qrGlow {
+      0%, 100% { box-shadow: 0 0 20px rgba(31, 120, 255, 0.3); }
+      50% { box-shadow: 0 0 40px rgba(31, 120, 255, 0.8), 0 0 60px rgba(31, 120, 255, 0.4); }
+    }
+    
+    nav {
+      background: rgba(11, 31, 58, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 15px 0;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+    
+    nav.scrolled {
+      background: rgba(11, 31, 58, 1);
+      box-shadow: 0 4px 30px rgba(0,0,0,0.2);
+    }
+    
+    nav .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 20px;
+    }
+    
+    nav .nav-logo {
+      display: flex;
+      gap: 10px;
+      color: white;
+      font-size: 1.5em;
+      font-weight: bold;
+      text-decoration: none;
+    }
+    
+    nav .nav-logo {
+      width: 40px;
+      height: 40px;
+    }
+    
+    nav .nav-links {
+      display: flex;
+      gap: 30px;
+      list-style: none;
+      align-items: center;
+    }
+    
+    nav .nav-links a {
+      color: white;
+      text-decoration: none;
+      font-size: 1.1em;
+      padding: 8px 16px;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    nav .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 2px;
+      background: #1f78ff;
+      transition: width 0.3s ease;
+    }
+    
+    nav .nav-links a:hover::after {
+      width: 80%;
+    }
+    
+    nav .nav-links a:hover {
+      color: #4d9fff;
+    }
+    
+    .nav-toggle {
+      display: none;
+      flex-direction: column;
+      cursor: pointer;
+      gap: 5px;
+    }
+    
+    .nav-toggle span {
+      width: 25px;
+      height: 3px;
+      background: white;
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+    
+    @media (max-width: 768px) {
+      nav .nav-links {
+        position: fixed;
+        top: 70px;
+        right: -100%;
+        flex-direction: column;
+        background: rgba(11, 31, 58, 0.98);
+        width: 250px;
+        padding: 30px;
+        border-radius: 10px 0 0 10px;
+        box-shadow: -5px 0 20px rgba(0,0,0,0.3);
+        transition: right 0.4s ease;
+      }
+      
+      nav .nav-links.active {
+        right: 0;
+      }
+      
+      .nav-toggle {
+        display: flex;
+      }
+      
+      .nav-toggle.active span:nth-child(1) {
+        transform: rotate(45deg) translate(8px, 8px);
+      }
+      
+      .nav-toggle.active span:nth-child(2) {
+        opacity: 0;
+      }
+      
+      .nav-toggle.active span:nth-child(3) {
+        transform: rotate(-45deg) translate(7px, -7px);
+      }
+    }
+    
+    header { 
+      background: linear-gradient(135deg, #0b1f3a 0%, #1f4068 100%);
+      color: #fff; 
+      padding: 80px 20px; 
+      text-align: center; 
+      position: relative;
+      overflow: hidden;
+    }
+    
+    header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+      background-size: 50px 50px;
+      animation: float 20s infinite linear;
+    }
+    
+    .logo {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 20px;
+      animation: float 3s ease-in-out infinite;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .qr-showcase {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 40px;
+      margin: 60px 0;
+      flex-wrap: wrap;
+    }
+    
+    .qr-container {
+      position: relative;
+      width: 280px;
+      height: 280px;
+      perspective: 1000px;
+    }
+    
+    .qr-image {
+      width: 100%;
+      height: 100%;
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      animation: rotate3d 10s infinite linear, qrGlow 2s infinite ease-in-out;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .qr-image::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #1f78ff, transparent);
+      animation: scanLine 3s infinite ease-in-out;
+    }
+    
+    .qr-image svg {
+      width: 100%;
+      height: 100%;
+    }
+    
+    .qr-label {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #1f78ff;
+    }
+    
+    header h1 { 
+      margin: 0; 
+      font-size: 3.5em; 
+      animation: fadeInUp 1s ease-out;
+      position: relative;
+      z-index: 1;
+      text-shadow: 0 0 20px rgba(31, 120, 255, 0.5);
+    }
+    
+    header p { 
+      font-size: 1.3em; 
+      margin-top: 15px; 
+      animation: fadeInUp 1s ease-out 0.2s backwards;
+      position: relative;
+      z-index: 1;
+    }
+    
+    header p:last-of-type {
+      animation-delay: 0.4s;
+    }
+    
+      
+    
+    
+    .btn { 
+      display: inline-block; 
+      margin: 15px 10px; 
+      padding: 14px 28px; 
+      background: linear-gradient(45deg, #1f78ff, #4d9fff);
+      color: #fff; 
+      text-decoration: none; 
+      border-radius: 30px; 
+      font-weight: bold;
+      transition: all 0.3s ease;
+      animation: fadeInUp 1s ease-out 0.6s backwards;
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 4px 15px rgba(31, 120, 255, 0.4);
+    }
+    
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 25px rgba(31, 120, 255, 0.6);
+      background: linear-gradient(45deg, #4d9fff, #1f78ff);
+    }
+    
+    section { 
+      padding: 70px 20px; 
+      max-width: 1200px; 
+      margin: auto; 
+      background: #fff;
+      margin-top: 40px;
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+      animation: fadeInUp 0.8s ease-out;
+    }
+    
+    section:first-of-type {
+      margin-top: -30px;
+      position: relative;
+      z-index: 2;
+    }
+    
+    h2 { 
+      color: #0b1f3a; 
+      font-size: 2.5em;
+      margin-bottom: 30px;
+      position: relative;
+      display: inline-block;
+    }
+    
+    h2::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 0;
+      width: 60px;
+      height: 4px;
+      background: linear-gradient(90deg, #1f78ff, #4d9fff);
+      border-radius: 2px;
+    }
+    
+    .features, .industries, .steps { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+      gap: 25px; 
+      margin-top: 40px;
+    }
+    
+    .card { 
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+      padding: 30px; 
+      border-radius: 15px; 
+      box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+      transition: all 0.4s ease;
+      border: 2px solid transparent;
+      position: relative;
+      overflow: hidden;
+      text-align: left;
+    }
+    
+    .card ul {
+      margin: 10px 0;
+      padding-left: 20px;
+    }
+    
+    .card ul li {
+      margin: 5px 0;
+      font-size: 0.95em;
+      line-height: 1.5;
+    }
+    
+    .card strong {
+      color: #0b1f3a;
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 8px;
+    }
+    
+    .card strong:first-child {
+      margin-top: 0;
+    }
+    
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(31, 120, 255, 0.1), transparent);
+      transition: left 0.5s ease;
+    }
+    
+    .card:hover::before {
+      left: 100%;
+    }
+    
+    .card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 40px rgba(31, 120, 255, 0.2);
+      border-color: #1f78ff;
+    }
+    
+    .card h3 {
+      color: #1f78ff;
+      margin-bottom: 15px;
+      font-size: 1.4em;
+    }
+    
+    .steps .card {
+      text-align: center;
+      font-weight: 600;
+      font-size: 1.1em;
+      background: linear-gradient(135deg, #1f78ff 0%, #4d9fff 100%);
+      color: white;
+    }
+    
+    .steps .card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 30px rgba(31, 120, 255, 0.4);
+    }
+    
+    #core-features .card {
+      text-align: center;
+      font-weight: 600;
+      font-size: 1.05em;
+      padding: 25px 20px;
+    }
+    
+    #contact {
+      background: linear-gradient(135deg, #0b1f3a 0%, #1f4068 100%);
+      color: white;
+      text-align: center;
+    }
+    
+    #contact h2 {
+      color: white;
+    }
+    
+    #contact h2::after {
+      background: linear-gradient(90deg, #4d9fff, #1f78ff);
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    
+    #contact p {
+      font-size: 1.2em;
+      margin: 15px 0;
+    }
+    
+    footer { 
+      background: #0b1f3a;
+      color: #fff; 
+      text-align: center; 
+      padding: 30px; 
+      margin-top: 60px;
+    }
+    
+    .animate-on-scroll {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.8s ease;
+    }
+    
+    .animate-on-scroll.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    @media (max-width: 768px) {
+      header h1 { font-size: 2.5em; }
+      h2 { font-size: 2em; }
+      .features, .industries, .steps { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<nav>
+  <div class="nav-container">
+    <a href="#" class="nav-logo">
+      <img src="img/logo.png" alt="logo"  srcset="">
+ 
+      Qnonce
+    </a>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#technology">Services</a></li>
+      <li><a href="#industries">Industries</a></li>
+      <li><a href="#how-it-works">How It Works</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <div class="nav-toggle">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </div>
+</nav>
+
+<header>
+  <svg class="logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style="stop-color:#1f78ff;stop-opacity:1" />
+        <stop offset="100%" style="stop-color:#4d9fff;stop-opacity:1" />
+      </linearGradient>
+    </defs>
+    <rect x="10" y="10" width="30" height="30" fill="url(#logoGrad)" rx="5"/>
+    <rect x="60" y="10" width="30" height="30" fill="url(#logoGrad)" rx="5"/>
+    <rect x="10" y="60" width="30" height="30" fill="url(#logoGrad)" rx="5"/>
+    <rect x="60" y="60" width="30" height="30" fill="url(#logoGrad)" rx="5"/>
+    <circle cx="50" cy="50" r="12" fill="white"/>
+    <path d="M 45 50 L 48 53 L 55 45" stroke="url(#logoGrad)" stroke-width="3" fill="none" stroke-linecap="round"/>
+  </svg>
+  <h1>Qnonce</h1>
+  <p>Non-Cloneable QR Code Security</p>
+  <p>Protect your brand from counterfeiting with next-generation non-cloneable QR codes.</p>
+  <a href="#contact" class="btn">Get a Demo</a>
+  <a href="#contact" class="btn">Contact Sales</a>
+</header>
+
+<section id="about" class="animate-on-scroll">
+  <h2>About Qnonce</h2>
+  <p>
+    Qnonce is a next-generation QR security platform that provides non-cloneable, one-time use QR codes for product authentication, brand protection, and consumer trust.
+    Our technology ensures that every QR code is unique, tamper-proof, and verifiable in real time.
+ 
+</section>
+
+<section id="technology" class="animate-on-scroll">
+  <h2>Our Technology</h2>
+  <p>
+    Qnonce uses dynamic encryption and server-side verification to generate QR codes that cannot be duplicated or reused.
+    Each scan validates authenticity in real time, ensuring protection against counterfeit products.
+  </p>
+ 
+  
+  <div class="qr-showcase">
+    <div class="qr-container">
+      <div class="qr-image">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <!-- QR Code Pattern -->
+          <rect x="20" y="20" width="30" height="30" fill="#0b1f3a"/>
+          <rect x="60" y="20" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="80" y="20" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="100" y="20" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="150" y="20" width="30" height="30" fill="#0b1f3a"/>
+          
+          <rect x="20" y="30" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="40" y="30" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="70" y="30" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="90" y="30" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="150" y="30" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="170" y="30" width="10" height="10" fill="#0b1f3a"/>
+          
+          <rect x="20" y="40" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="40" y="40" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="60" y="40" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="110" y="40" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="150" y="40" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="170" y="40" width="10" height="10" fill="#0b1f3a"/>
+          
+          <rect x="60" y="60" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="80" y="60" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="100" y="60" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="120" y="60" width="10" height="10" fill="#0b1f3a"/>
+          
+          <rect x="20" y="70" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="50" y="70" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="70" y="70" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="110" y="70" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="140" y="70" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="170" y="70" width="10" height="10" fill="#0b1f3a"/>
+          
+          <rect x="30" y="80" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="60" y="80" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="90" y="80" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="130" y="80" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="160" y="80" width="10" height="10" fill="#0b1f3a"/>
+          
+          <!-- Center logo area -->
+          <rect x="80" y="80" width="40" height="40" fill="white" stroke="#1f78ff" stroke-width="2"/>
+          <circle cx="100" cy="100" r="15" fill="#1f78ff"/>
+          <path d="M 95 100 L 98 103 L 105 95" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
+          
+          <rect x="40" y="90" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="140" y="90" width="10" height="10" fill="#0b1f3a"/>
+          
+          <rect x="20" y="100" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="50" y="100" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="150" y="100" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="180" y="100" width="10" height="10" fill="#0b1f3a"/>
+          
+          <rect x="30" y="110" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="140" y="110" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="170" y="110" width="10" height="10" fill="#0b1f3a"/>
+          
+          <rect x="60" y="130" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="90" y="130" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="120" y="130" width="10" height="10" fill="#0b1f3a"/>
+          
+          <rect x="20" y="150" width="30" height="30" fill="#0b1f3a"/>
+          <rect x="70" y="150" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="100" y="150" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="130" y="150" width="10" height="10" fill="#0b1f3a"/>
+          
+          <rect x="20" y="160" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="40" y="160" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="80" y="160" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="110" y="160" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="150" y="160" width="10" height="10" fill="#0b1f3a"/>
+          
+          <rect x="20" y="170" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="40" y="170" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="60" y="170" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="90" y="170" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="140" y="170" width="10" height="10" fill="#0b1f3a"/>
+          <rect x="170" y="170" width="10" height="10" fill="#0b1f3a"/>
+        </svg>
+      </div>
+      <div class="qr-label">🔒 Non-Cloneable QR Code</div>
+    </div>
+  </div>
+  
+  <div class="features">
+    <div class="card">
+      <h3>🔐</h3>
+      One-time scan QR codes
+    </div>
+    <div class="card">
+      <h3>⚡</h3>
+      Real-time verification
+    </div>
+    <div class="card">
+      <h3>🛡️</h3>
+      Tamper-proof architecture
+    </div>
+    <div class="card">
+      <h3>🔄</h3>
+      Dynamic QR regeneration
+    </div>
+    <div class="card">
+      <h3>☁️</h3>
+      Cloud-based dashboard
+    </div>
+    <div class="card">
+      <h3>🔌</h3>
+      API integration
+    </div>
+  </div>
+</section>
+
+<section id="industries" class="animate-on-scroll">
+  <h2>Solutions by Industry</h2>
+  <p style="text-align: center; font-size: 1.1em; margin-bottom: 40px;">Tailored non-cloneable QR solutions for every sector</p>
+  
+  <div class="industries">
+    <div class="card">
+      <h3>💊 Pharma QR Code</h3>
+      <p><strong>Use:</strong> Tablets, syrups, injections, strips, bottles</p>
+      <p><strong>Purpose:</strong></p>
+      <ul>
+        <li>Stop fake medicines</li>
+        <li>Verify genuine product</li>
+        <li>Track batch & expiry</li>
+      </ul>
+      <p><strong>Features:</strong></p>
+      <ul>
+        <li>✓ One-time scan only</li>
+        <li>✓ Product name, batch no., expiry date</li>
+        <li>✓ Real-time server verification</li>
+        <li>✓ Alerts if scanned twice</li>
+        <li>✓ Geo-location tracking</li>
+        <li>✓ "Genuine / Fake" screen</li>
+      </ul>
+    </div>
+    
+    <div class="card">
+      <h3>🥤 Drink QR Code</h3>
+      <p><strong>Use:</strong> Water bottles, energy drinks, juice, cold drinks</p>
+      <p><strong>Purpose:</strong></p>
+      <ul>
+        <li>Prevent bottle duplication</li>
+        <li>Verify original filling</li>
+        <li>Customer trust</li>
+      </ul>
+      <p><strong>Features:</strong></p>
+      <ul>
+        <li>✓ Non-cloneable dynamic QR</li>
+        <li>✓ Scan count limit (1 or 2)</li>
+        <li>✓ Manufacturing date info</li>
+        <li>✓ Distributor tracking</li>
+        <li>✓ Loyalty points / offers</li>
+        <li>✓ Fake scan warning</li>
+      </ul>
+    </div>
+    
+    <div class="card">
+      <h3>🍱 Food Product QR Code</h3>
+      <p><strong>Use:</strong> Packaged food, snacks, dairy products, ready-to-eat meals</p>
+      <p><strong>Purpose:</strong></p>
+      <ul>
+        <li>Product traceability</li>
+        <li>Food safety</li>
+        <li>Anti-counterfeit</li>
+      </ul>
+      <p><strong>Features:</strong></p>
+      <ul>
+        <li>✓ One-time authentication</li>
+        <li>✓ Ingredient & nutrition info</li>
+        <li>✓ FSSAI license display</li>
+        <li>✓ Expiry date validation</li>
+        <li>✓ Supply chain tracking</li>
+        <li>✓ Recall alert system</li>
+      </ul>
+    </div>
+    
+    <div class="card">
+      <h3>👕 Fashion QR Code</h3>
+      <p><strong>Use:</strong> Apparel brands, footwear, luxury fashion items</p>
+      <p><strong>Purpose:</strong></p>
+      <ul>
+        <li>Stop fake branded clothes</li>
+        <li>Verify original brand item</li>
+        <li>Brand story & care guide</li>
+      </ul>
+      <p><strong>Features:</strong></p>
+      <ul>
+        <li>✓ Unique QR per item</li>
+        <li>✓ One-time verification</li>
+        <li>✓ Product serial number</li>
+        <li>✓ Warranty registration</li>
+        <li>✓ Owner transfer option</li>
+        <li>✓ Anti-resale fraud protection</li>
+      </ul>
+    </div>
+    
+    <div class="card">
+      <h3>🎨 Design QR Code</h3>
+      <p><strong>Use:</strong> Digital art, certificates, legal documents, product designs</p>
+      <p><strong>Purpose:</strong></p>
+      <ul>
+        <li>Protect originality</li>
+        <li>Prove authenticity</li>
+        <li>Ownership verification</li>
+      </ul>
+      <p><strong>Features:</strong></p>
+      <ul>
+        <li>✓ One-time scan or view</li>
+        <li>✓ Document hash verification</li>
+        <li>✓ Timestamped records</li>
+        <li>✓ Tamper detection</li>
+        <li>✓ Owner verification</li>
+        <li>✓ Copy-proof access</li>
+      </ul>
+    </div>
+    
+    <div class="card">
+      <h3>🔧 Auto Parts QR Code</h3>
+      <p><strong>Use:</strong> Engine parts, brake pads, filters, electronic parts</p>
+      <p><strong>Purpose:</strong></p>
+      <ul>
+        <li>Stop fake spare parts</li>
+        <li>Verify manufacturer</li>
+        <li>Warranty validation</li>
+      </ul>
+      <p><strong>Features:</strong></p>
+      <ul>
+        <li>✓ One-time use QR</li>
+        <li>✓ Serial number matching</li>
+        <li>✓ Warranty activation</li>
+        <li>✓ Service center verification</li>
+        <li>✓ Dealer tracking</li>
+        <li>✓ Fake part alert</li>
+      </ul>
+    </div>
+    
+    <div class="card">
+      <h3>📦 Parcel Lock QR Code</h3>
+      <p><strong>About:</strong> Employee-only, location-locked verification for secure internal parcels</p>
+      <p><strong>Use:</strong> Internal company parcels, restricted deliveries, secure handovers</p>
+      <p><strong>Purpose:</strong></p>
+      <ul>
+        <li>Secure internal company parcels</li>
+        <li>Prevent unauthorized access</li>
+        <li>Stop internal theft or tampering</li>
+        <li>Track parcel handovers</li>
+        <li>Enforce location-based scanning</li>
+      </ul>
+      <p><strong>Key Features:</strong></p>
+      <ul>
+        <li>✓ Non-cloneable dynamic QR code</li>
+        <li>✓ Employee login required to scan</li>
+        <li>✓ Location-locked scanning (geo-fencing)</li>
+        <li>✓ One-time or multi-step scan flow</li>
+        <li>✓ Handover verification logs</li>
+        <li>✓ Timestamped scan history</li>
+        <li>✓ Unauthorized scan alerts</li>
+        <li>✓ Device ID binding</li>
+        <li>✓ Role-based access control</li>
+        <li>✓ Admin dashboard monitoring</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="core-features" class="animate-on-scroll">
+  <h2>Common Core Features</h2>
+  <p style="text-align: center; font-size: 1.1em; margin-bottom: 40px;">Powerful capabilities across all QR solutions</p>
+  <div class="features">
+    <div class="card">✔ Non-cloneable QR generation</div>
+    <div class="card">✔ One-time scan logic</div>
+    <div class="card">✔ Server-side verification</div>
+    <div class="card">✔ Dynamic QR mapping</div>
+    <div class="card">✔ API integration</div>
+    <div class="card">✔ Admin dashboard</div>
+    <div class="card">✔ Scan analytics</div>
+    <div class="card">✔ Geo-tracking</div>
+    <div class="card">✔ Fake scan alerts</div>
+    <div class="card">✔ Product lifecycle tracking</div>
+  </div>
+</section>
+
+<section id="how-it-works" class="animate-on-scroll">
+  <h2>How It Works</h2>
+  <div class="steps">
+    <div class="card">1. Generate a unique non-cloneable QR code</div>
+    <div class="card">2. Print it on your product</div>
+    <div class="card">3. Customer scans the QR</div>
+    <div class="card">4. System verifies authenticity</div>
+    <div class="card">5. Shows "Genuine" or "Fake" status</div>
+  </div>
+</section>
+
+<section id="contact" class="animate-on-scroll">
+  <h2>Contact Qnonce</h2>
+  <p>Have questions or need a demo?</p>
+  <p><strong>Phone:</strong> 7352591702</p>
+  <p><strong>Email:</strong> info@qnonce.com</p>
+</section>
+
+<footer>
+  <p>© 2026 Qnonce Pvt. Ltd. All rights reserved.</p>
+</footer>
+
+<script>
+  // Mobile menu toggle
+  const navToggle = document.querySelector('.nav-toggle');
+  const navLinks = document.querySelector('.nav-links');
+  
+  navToggle.addEventListener('click', () => {
+    navToggle.classList.toggle('active');
+    navLinks.classList.toggle('active');
+  });
+  
+  // Close menu when clicking on a link
+  document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', () => {
+      navToggle.classList.remove('active');
+      navLinks.classList.remove('active');
+    });
+  });
+  
+  // Navbar scroll effect
+  const nav = document.querySelector('nav');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 50) {
+      nav.classList.add('scrolled');
+    } else {
+      nav.classList.remove('scrolled');
+    }
+  });
+  
+  // Smooth scrolling for anchor links
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        const navHeight = nav.offsetHeight;
+        const targetPosition = target.offsetTop - navHeight;
+        window.scrollTo({ 
+          top: targetPosition, 
+          behavior: 'smooth' 
+        });
+      }
+    });
+  });
+
+  // Scroll animation observer
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.animate-on-scroll').forEach(el => {
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>
