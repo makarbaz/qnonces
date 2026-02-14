@@ -1,914 +1,2213 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Qnonce – Non-Cloneable QR Code Security</title>
-  <meta name="description" content="Qnonce provides non-cloneable QR codes to prevent counterfeiting and protect brands. Secure, one-time use QR codes for pharma, FMCG, and food industries." />
-  <meta name="keywords" content="non-cloneable QR code, secure QR code, anti-fake QR code, one-time use QR, product authentication, brand protection QR" />
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    
-    body { 
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-      background: linear-gradient(135deg, #0b1f3a 0%, #1a3a5c 100%);
-      color: #222; 
-      overflow-x: hidden;
-    }
-    
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    
-    @keyframes float {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-20px); }
-    }
-    
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-    }
-    
-    @keyframes shimmer {
-      0% { background-position: -1000px 0; }
-      100% { background-position: 1000px 0; }
-    }
-    
-    @keyframes scanLine {
-      0%, 100% { transform: translateY(-100%); opacity: 0; }
-      50% { opacity: 1; }
-      100% { transform: translateY(200%); }
-    }
-    
-    @keyframes rotate3d {
-      0% { transform: rotateY(0deg) rotateX(0deg); }
-      50% { transform: rotateY(180deg) rotateX(10deg); }
-      100% { transform: rotateY(360deg) rotateX(0deg); }
-    }
-    
-    @keyframes qrGlow {
-      0%, 100% { box-shadow: 0 0 20px rgba(31, 120, 255, 0.3); }
-      50% { box-shadow: 0 0 40px rgba(31, 120, 255, 0.8), 0 0 60px rgba(31, 120, 255, 0.4); }
-    }
-    
-    nav {
-      background: rgba(11, 31, 58, 0.95);
-      backdrop-filter: blur(10px);
-      padding: 15px 0;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      box-shadow: 0 2px 20px rgba(0,0,0,0.1);
-      transition: all 0.3s ease;
-    }
-    
-    nav.scrolled {
-      background: rgba(11, 31, 58, 1);
-      box-shadow: 0 4px 30px rgba(0,0,0,0.2);
-    }
-    
-    nav .nav-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 20px;
-    }
-    
-    nav .nav-logo {
-      display: flex;
-      gap: 10px;
-      color: white;
-      font-size: 1.5em;
-      font-weight: bold;
-      text-decoration: none;
-    }
-    
-    nav .nav-logo {
-      width: 40px;
-      height: 40px;
-    }
-    
-    nav .nav-links {
-      display: flex;
-      gap: 30px;
-      list-style: none;
-      align-items: center;
-    }
-    
-    nav .nav-links a {
-      color: white;
-      text-decoration: none;
-      font-size: 1.1em;
-      padding: 8px 16px;
-      border-radius: 5px;
-      transition: all 0.3s ease;
-      position: relative;
-    }
-    
-    nav .nav-links a::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 0;
-      height: 2px;
-      background: #1f78ff;
-      transition: width 0.3s ease;
-    }
-    
-    nav .nav-links a:hover::after {
-      width: 80%;
-    }
-    
-    nav .nav-links a:hover {
-      color: #4d9fff;
-    }
-    
-    .nav-toggle {
-      display: none;
-      flex-direction: column;
-      cursor: pointer;
-      gap: 5px;
-    }
-    
-    .nav-toggle span {
-      width: 25px;
-      height: 3px;
-      background: white;
-      border-radius: 2px;
-      transition: all 0.3s ease;
-    }
-    
-    @media (max-width: 768px) {
-      nav .nav-links {
-        position: fixed;
-        top: 70px;
-        right: -100%;
-        flex-direction: column;
-        background: rgba(11, 31, 58, 0.98);
-        width: 250px;
-        padding: 30px;
-        border-radius: 10px 0 0 10px;
-        box-shadow: -5px 0 20px rgba(0,0,0,0.3);
-        transition: right 0.4s ease;
-      }
-      
-      nav .nav-links.active {
-        right: 0;
-      }
-      
-      .nav-toggle {
-        display: flex;
-      }
-      
-      .nav-toggle.active span:nth-child(1) {
-        transform: rotate(45deg) translate(8px, 8px);
-      }
-      
-      .nav-toggle.active span:nth-child(2) {
-        opacity: 0;
-      }
-      
-      .nav-toggle.active span:nth-child(3) {
-        transform: rotate(-45deg) translate(7px, -7px);
-      }
-    }
-    
-    header { 
-      background: linear-gradient(135deg, #0b1f3a 0%, #1f4068 100%);
-      color: #fff; 
-      padding: 80px 20px; 
-      text-align: center; 
-      position: relative;
-      overflow: hidden;
-    }
-    
-    header::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
-      background-size: 50px 50px;
-      animation: float 20s infinite linear;
-    }
-    
-    .logo {
-      width: 80px;
-      height: 80px;
-      margin: 0 auto 20px;
-      animation: float 3s ease-in-out infinite;
-      position: relative;
-      z-index: 1;
-    }
-    
-    .qr-showcase {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 40px;
-      margin: 60px 0;
-      flex-wrap: wrap;
-    }
-    
-    .qr-container {
-      position: relative;
-      width: 280px;
-      height: 280px;
-      perspective: 1000px;
-    }
-    
-    .qr-image {
-      width: 100%;
-      height: 100%;
-      background: white;
-      border-radius: 20px;
-      padding: 20px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-      animation: rotate3d 10s infinite linear, qrGlow 2s infinite ease-in-out;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .qr-image::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, #1f78ff, transparent);
-      animation: scanLine 3s infinite ease-in-out;
-    }
-    
-    .qr-image svg {
-      width: 100%;
-      height: 100%;
-    }
-    
-    .qr-label {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 1.2em;
-      font-weight: bold;
-      color: #1f78ff;
-    }
-    
-    header h1 { 
-      margin: 0; 
-      font-size: 3.5em; 
-      animation: fadeInUp 1s ease-out;
-      position: relative;
-      z-index: 1;
-      text-shadow: 0 0 20px rgba(31, 120, 255, 0.5);
-    }
-    
-    header p { 
-      font-size: 1.3em; 
-      margin-top: 15px; 
-      animation: fadeInUp 1s ease-out 0.2s backwards;
-      position: relative;
-      z-index: 1;
-    }
-    
-    header p:last-of-type {
-      animation-delay: 0.4s;
-    }
-    
-      
-    
-    
-    .btn { 
-      display: inline-block; 
-      margin: 15px 10px; 
-      padding: 14px 28px; 
-      background: linear-gradient(45deg, #1f78ff, #4d9fff);
-      color: #fff; 
-      text-decoration: none; 
-      border-radius: 30px; 
-      font-weight: bold;
-      transition: all 0.3s ease;
-      animation: fadeInUp 1s ease-out 0.6s backwards;
-      position: relative;
-      z-index: 1;
-      box-shadow: 0 4px 15px rgba(31, 120, 255, 0.4);
-    }
-    
-    .btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 25px rgba(31, 120, 255, 0.6);
-      background: linear-gradient(45deg, #4d9fff, #1f78ff);
-    }
-    
-    section { 
-      padding: 70px 20px; 
-      max-width: 1200px; 
-      margin: auto; 
-      background: #fff;
-      margin-top: 40px;
-      border-radius: 20px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-      animation: fadeInUp 0.8s ease-out;
-    }
-    
-    section:first-of-type {
-      margin-top: -30px;
-      position: relative;
-      z-index: 2;
-    }
-    
-    h2 { 
-      color: #0b1f3a; 
-      font-size: 2.5em;
-      margin-bottom: 30px;
-      position: relative;
-      display: inline-block;
-    }
-    
-    h2::after {
-      content: '';
-      position: absolute;
-      bottom: -10px;
-      left: 0;
-      width: 60px;
-      height: 4px;
-      background: linear-gradient(90deg, #1f78ff, #4d9fff);
-      border-radius: 2px;
-    }
-    
-    .features, .industries, .steps { 
-      display: grid; 
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
-      gap: 25px; 
-      margin-top: 40px;
-    }
-    
-    .card { 
-      background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
-      padding: 30px; 
-      border-radius: 15px; 
-      box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-      transition: all 0.4s ease;
-      border: 2px solid transparent;
-      position: relative;
-      overflow: hidden;
-      text-align: left;
-    }
-    
-    .card ul {
-      margin: 10px 0;
-      padding-left: 20px;
-    }
-    
-    .card ul li {
-      margin: 5px 0;
-      font-size: 0.95em;
-      line-height: 1.5;
-    }
-    
-    .card strong {
-      color: #0b1f3a;
-      display: block;
-      margin-top: 15px;
-      margin-bottom: 8px;
-    }
-    
-    .card strong:first-child {
-      margin-top: 0;
-    }
-    
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(31, 120, 255, 0.1), transparent);
-      transition: left 0.5s ease;
-    }
-    
-    .card:hover::before {
-      left: 100%;
-    }
-    
-    .card:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 15px 40px rgba(31, 120, 255, 0.2);
-      border-color: #1f78ff;
-    }
-    
-    .card h3 {
-      color: #1f78ff;
-      margin-bottom: 15px;
-      font-size: 1.4em;
-    }
-    
-    .steps .card {
-      text-align: center;
-      font-weight: 600;
-      font-size: 1.1em;
-      background: linear-gradient(135deg, #1f78ff 0%, #4d9fff 100%);
-      color: white;
-    }
-    
-    .steps .card:hover {
-      transform: scale(1.05);
-      box-shadow: 0 10px 30px rgba(31, 120, 255, 0.4);
-    }
-    
-    #core-features .card {
-      text-align: center;
-      font-weight: 600;
-      font-size: 1.05em;
-      padding: 25px 20px;
-    }
-    
-    #contact {
-      background: linear-gradient(135deg, #0b1f3a 0%, #1f4068 100%);
-      color: white;
-      text-align: center;
-    }
-    
-    #contact h2 {
-      color: white;
-    }
-    
-    #contact h2::after {
-      background: linear-gradient(90deg, #4d9fff, #1f78ff);
-      left: 50%;
-      transform: translateX(-50%);
-    }
-    
-    #contact p {
-      font-size: 1.2em;
-      margin: 15px 0;
-    }
-    
-    footer { 
-      background: #0b1f3a;
-      color: #fff; 
-      text-align: center; 
-      padding: 30px; 
-      margin-top: 60px;
-    }
-    
-    .animate-on-scroll {
-      opacity: 0;
-      transform: translateY(30px);
-      transition: all 0.8s ease;
-    }
-    
-    .animate-on-scroll.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    
-    @media (max-width: 768px) {
-      header h1 { font-size: 2.5em; }
-      h2 { font-size: 2em; }
-      .features, .industries, .steps { grid-template-columns: 1fr; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureQR - Next-Gen Anti-Counterfeit Technology</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* ===== GLOBAL STYLES ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* ===== SCROLL ANIMATIONS ===== */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .slide-left {
+            opacity: 0;
+            transform: translateX(-50px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .slide-left.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .slide-right {
+            opacity: 0;
+            transform: translateX(50px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .slide-right.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* ===== NAVBAR ===== */
+        .navbar-custom {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            padding: 16px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-custom.scrolled {
+            background: rgba(15, 23, 42, 0.98);
+            padding: 12px 0;
+            box-shadow: 0 6px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transition: transform 0.3s ease;
+        }
+
+        .navbar-brand:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-link {
+            color: #e2e8f0 !important;
+            font-weight: 500;
+            margin: 0 8px;
+            padding: 8px 16px !important;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #60a5fa, #a78bfa);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover {
+            color: #60a5fa !important;
+            background: rgba(96, 165, 250, 0.1);
+        }
+
+        .nav-link:hover::after {
+            width: 80%;
+        }
+
+        .btn-custom {
+            background: linear-gradient(90deg, #2563eb, #7c3aed);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(37, 99, 235, 0.5);
+            color: white;
+        }
+
+        /* ===== HERO SECTION ===== */
+        .hero-new {
+            padding: 120px 0 100px;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 50%, #fce7f3 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-new::before {
+            content: '';
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.1), transparent);
+            top: -200px;
+            right: -200px;
+            border-radius: 50%;
+            animation: pulse-bg 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse-bg {
+            0%, 100% { transform: scale(1); opacity: 0.1; }
+            50% { transform: scale(1.1); opacity: 0.15; }
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #dbeafe, #e0e7ff);
+            color: #2563eb;
+            padding: 8px 18px;
+            border-radius: 999px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            border: 2px solid rgba(37, 99, 235, 0.2);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+
+        .hero-title span {
+            background: linear-gradient(90deg, #2563eb, #7c3aed, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-desc {
+            font-size: 1.1rem;
+            color: #475569;
+            max-width: 580px;
+            margin-bottom: 30px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+
+        .hero-buttons .btn {
+            padding: 14px 30px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .hero-buttons .btn-primary {
+            background: linear-gradient(90deg, #2563eb, #7c3aed);
+            border: none;
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        .hero-buttons .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(37, 99, 235, 0.4);
+        }
+
+        .hero-buttons .btn-outline-primary {
+            border: 2px solid #2563eb;
+            color: #2563eb;
+        }
+
+        .hero-buttons .btn-outline-primary:hover {
+            background: #2563eb;
+            transform: translateY(-3px);
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 50px;
+            flex-wrap: wrap;
+        }
+
+        .hero-stats div {
+            text-align: left;
+        }
+
+        .hero-stats h4 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #2563eb, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+
+        .hero-stats span {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .counter {
+            display: inline-block;
+        }
+
+        /* ===== QR MOCK ===== */
+        .qr-mock {
+            width: 350px;
+            height: 350px;
+            margin: auto;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            animation: qrFloat 4s ease-in-out infinite;
+        }
+
+        @keyframes qrFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .qr-grid {
+            width: 240px;
+            height: 240px;
+            background-image: radial-gradient(#1f2937 4px, transparent 4px);
+            background-size: 20px 20px;
+            border-radius: 12px;
+        }
+
+        .qr-label {
+            position: absolute;
+            background: white;
+            padding: 10px 16px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            white-space: nowrap;
+            animation: labelFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes labelFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .qr-label.top {
+            top: 30px;
+            left: -60px;
+            background: linear-gradient(135deg, #dbeafe, #e0e7ff);
+            color: #2563eb;
+        }
+
+        .qr-label.bottom {
+            bottom: 30px;
+            right: -70px;
+            background: linear-gradient(135deg, #fce7f3, #fbcfe8);
+            color: #be185d;
+        }
+
+        /* ===== SECTIONS ===== */
+        section {
+            padding: 100px 0;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .section-title span {
+            background: linear-gradient(90deg, #2563eb, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .section-subtitle {
+            color: #64748b;
+            max-width: 680px;
+            margin: 0 auto 50px;
+            font-size: 1rem;
+        }
+
+        /* ===== PROBLEM SECTION ===== */
+        .problem-section {
+            background: #ffffff;
+        }
+
+        .problem-title .danger {
+            color: #ef4444;
+        }
+
+        .compare-box {
+            position: relative;
+            display: flex;
+            border-radius: 24px;
+            overflow: hidden;
+            min-height: 320px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        }
+
+        .compare-side {
+            flex: 1;
+            padding: 50px 40px;
+            text-align: left;
+        }
+
+        .compare-side h5 {
+            font-weight: 700;
+            margin-bottom: 25px;
+            font-size: 1.3rem;
+        }
+
+        .compare-side ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .compare-side li {
+            margin-bottom: 15px;
+            font-size: 1rem;
+            padding-left: 10px;
+        }
+
+        .compare-side.unsafe {
+            background: linear-gradient(180deg, #fef2f2, #fee2e2);
+            color: #991b1b;
+        }
+
+        .compare-side.safe {
+            background: linear-gradient(180deg, #ecfdf5, #d1fae5);
+            color: #065f46;
+        }
+
+        .qr-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .qr-card {
+            width: 130px;
+            height: 130px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .qr-dots {
+            width: 80px;
+            height: 80px;
+            background-image: radial-gradient(#1f2937 3px, transparent 3px);
+            background-size: 16px 16px;
+        }
+
+        /* ===== ANIMATED QR CODE ===== */
+        .qr-card-animated {
+            width: 130px;
+            height: 130px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .qr-dots-animated {
+            width: 80px;
+            height: 80px;
+            background-image: radial-gradient(#1f2937 3px, transparent 3px);
+            background-size: 16px 16px;
+            z-index: 1;
+        }
+
+        .scan-line {
+            position: absolute;
+            width: 90%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+            top: 0;
+            left: 5%;
+            animation: scanAnimation 3s ease-in-out infinite;
+            z-index: 2;
+            box-shadow: 0 0 10px #3b82f6;
+        }
+
+        @keyframes scanAnimation {
+            0%, 100% { top: 10%; opacity: 0; }
+            10% { opacity: 1; }
+            50% { top: 50%; }
+            90% { opacity: 1; }
+            100% { top: 90%; opacity: 0; }
+        }
+
+        .qr-status {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.4s ease;
+            z-index: 3;
+        }
+
+        .qr-status.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .unsafe-status {
+            background: linear-gradient(135deg, rgba(254, 226, 226, 0.98), rgba(252, 165, 165, 0.98));
+        }
+
+        .safe-status {
+            background: linear-gradient(135deg, rgba(220, 252, 231, 0.98), rgba(167, 243, 208, 0.98));
+        }
+
+        .status-icon {
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+            animation: statusPop 0.5s ease;
+        }
+
+        @keyframes statusPop {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .unsafe-status .status-icon {
+            color: #dc2626;
+        }
+
+        .safe-status .status-icon {
+            color: #16a34a;
+        }
+
+        .status-text {
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .unsafe-status .status-text {
+            color: #991b1b;
+        }
+
+        .safe-status .status-text {
+            color: #065f46;
+        }
+
+        /* ===== MOBILE DEMO SECTION ===== */
+        .mobile-demo-section {
+            margin-top: 80px;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border-radius: 30px;
+        }
+
+        .mobile-demo-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 40px;
+            background: linear-gradient(90deg, #2563eb, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .mobile-mockup {
+            width: 320px;
+            margin: 0 auto;
+            padding: 15px;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border-radius: 40px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .mobile-mockup::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            background: linear-gradient(45deg, #3b82f6, #8b5cf6, #ec4899);
+            border-radius: 42px;
+            z-index: -1;
+            opacity: 0.5;
+            animation: borderPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes borderPulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.7; }
+        }
+
+        .mobile-screen {
+            background: white;
+            border-radius: 35px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .mobile-header {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            padding: 25px 20px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            font-size: 0.85rem;
+            position: relative;
+        }
+
+        .notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 25px;
+            background: white;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .mobile-content {
+            padding: 40px 20px;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(180deg, #ffffff, #f8fafc);
+        }
+
+        .scan-demo-qr {
+            width: 180px;
+            height: 180px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .demo-qr-code {
+            width: 140px;
+            height: 140px;
+            background-image: radial-gradient(#1f2937 4px, transparent 4px);
+            background-size: 18px 18px;
+            border-radius: 10px;
+        }
+
+        .demo-scan-line {
+            position: absolute;
+            width: 85%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #22c55e, transparent);
+            top: 0;
+            left: 7.5%;
+            animation: mobileScan 2.5s ease-in-out infinite;
+            box-shadow: 0 0 10px #22c55e;
+        }
+
+        @keyframes mobileScan {
+            0%, 100% { top: 10%; opacity: 0; }
+            10% { opacity: 1; }
+            50% { top: 50%; }
+            90% { opacity: 1; }
+            100% { top: 90%; opacity: 0; }
+        }
+
+        .verification-result {
+            text-align: center;
+            padding: 20px;
+            min-height: 120px;
+        }
+
+        .result-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 15px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            transition: all 0.5s ease;
+        }
+
+        .result-text {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            transition: all 0.5s ease;
+            color: #475569;
+        }
+
+        .result-details {
+            font-size: 0.85rem;
+            color: #64748b;
+            transition: all 0.5s ease;
+        }
+
+        .rescan-btn {
+            background: linear-gradient(90deg, #2563eb, #7c3aed);
+            color: white;
+            border: none;
+            padding: 14px 40px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+            margin-top: 20px;
+        }
+
+        .rescan-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(37, 99, 235, 0.5);
+        }
+
+        .rescan-btn:active {
+            transform: translateY(0);
+        }
+
+        .result-scanning {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .result-authentic .result-icon {
+            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+            color: #16a34a;
+        }
+
+        .result-authentic .result-icon::before {
+            content: '✓';
+        }
+
+        .result-authentic .result-text {
+            color: #16a34a;
+        }
+
+        .result-fake .result-icon {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            color: #dc2626;
+        }
+
+        .result-fake .result-icon::before {
+            content: '✗';
+        }
+
+        .result-fake .result-text {
+            color: #dc2626;
+        }
+
+        /* ===== SOLUTION SECTION ===== */
+        .solution-section {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        }
+
+        .solution-box {
+            background: linear-gradient(180deg, #ffffff, #f8fafc);
+            border-radius: 30px;
+            padding: 70px 50px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+        }
+
+        .solution-cards {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 40px;
+        }
+
+        .solution-card {
+            background: white;
+            border-radius: 20px;
+            padding: 35px 28px;
+            width: 300px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .solution-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            margin-bottom: 15px;
+        }
+
+        .icon.blue { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+        .icon.purple { background: linear-gradient(135deg, #8b5cf6, #6366f1); }
+        .icon.violet { background: linear-gradient(135deg, #a78bfa, #7c3aed); }
+        .icon.pink { background: linear-gradient(135deg, #f472b6, #ec4899); }
+        .icon.indigo { background: linear-gradient(135deg, #6366f1, #4f46e5); }
+        .icon.orange { background: linear-gradient(135deg, #fb923c, #f97316); }
+        .icon.green { background: linear-gradient(135deg, #34d399, #22c55e); }
+
+        .solution-card h5 {
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .solution-footer {
+            margin-top: 40px;
+            color: #475569;
+            font-size: 1rem;
+        }
+
+        /* ===== FEATURES ===== */
+        .features-section {
+            background: white;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 20px;
+            padding: 35px 30px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.06);
+            height: 100%;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 50px rgba(37, 99, 235, 0.15);
+            border-color: #2563eb;
+        }
+
+        /* ===== HOW IT WORKS ===== */
+        .how-section {
+            background: linear-gradient(135deg, #faf5ff, #f3e8ff);
+        }
+
+        .how-steps {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 60px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .how-card {
+            background: white;
+            border-radius: 20px;
+            padding: 35px 28px;
+            width: 260px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .how-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.15);
+        }
+
+        .step-number {
+            position: absolute;
+            top: -16px;
+            right: -16px;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 0.9rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .arrow {
+            font-size: 36px;
+            color: #94a3b8;
+            margin: 0 10px;
+        }
+
+        .speed-pill {
+            margin-top: 60px;
+            display: inline-block;
+            background: linear-gradient(90deg, #2563eb, #7c3aed);
+            color: white;
+            padding: 16px 32px;
+            border-radius: 999px;
+            font-size: 1rem;
+            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.5);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* ===== WHY CHOOSE ===== */
+        .why-section {
+            background: white;
+        }
+
+        .why-card {
+            background: white;
+            border-radius: 20px;
+            padding: 35px 30px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+            height: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .why-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12);
+        }
+
+        .why-card.highlight {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border: 2px solid #3b82f6;
+        }
+
+        .highlight-title {
+            color: #2563eb;
+        }
+
+        /* ===== INDUSTRIES ===== */
+        .industries-section {
+            background: linear-gradient(135deg, #fefce8, #fef3c7);
+        }
+
+        .industries-box {
+            background: white;
+            border-radius: 30px;
+            padding: 70px 50px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        }
+
+        .industries-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 25px;
+            margin-top: 50px;
+        }
+
+        .industry-card {
+            background: linear-gradient(135deg, #ffffff, #f8fafc);
+            border-radius: 18px;
+            padding: 30px 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .industry-card:hover {
+            transform: translateY(-8px) rotate(2deg);
+            box-shadow: 0 20px 50px rgba(37, 99, 235, 0.2);
+        }
+
+        .industry-icon {
+            font-size: 36px;
+            margin-bottom: 12px;
+        }
+
+        /* ===== TESTIMONIALS ===== */
+        .testimonial {
+            background: white;
+            padding: 35px 40px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+            border-left: 5px solid #2563eb;
+            transition: all 0.3s ease;
+        }
+
+        .testimonial:hover {
+            transform: translateX(10px);
+            box-shadow: 0 20px 50px rgba(37, 99, 235, 0.15);
+        }
+
+        .testimonial p:first-child {
+            font-style: italic;
+            color: #334155;
+            margin-bottom: 15px;
+        }
+
+        .testimonial p:last-child {
+            font-weight: 600;
+            color: #2563eb;
+            margin: 0;
+        }
+
+        /* ===== SECURITY ===== */
+        .security-section {
+            background: white;
+        }
+
+        .security-box {
+            background: linear-gradient(90deg, #2563eb, #7c3aed);
+            border-radius: 30px;
+            padding: 60px 50px;
+            color: white;
+            box-shadow: 0 25px 70px rgba(37, 99, 235, 0.4);
+        }
+
+        .security-items {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-top: 40px;
+        }
+
+        .security-item {
+            text-align: center;
+        }
+
+        .security-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+
+        .security-item p {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .security-title {
+            font-size: 1.9rem;
+            font-weight: 700;
+            margin-bottom: 40px;
+        }
+
+        /* ===== CTA SECTION ===== */
+        .cta-section {
+            position: relative;
+            padding: 140px 0;
+            background: linear-gradient(135deg, #1e3a8a, #5b21b6, #9333ea);
+            overflow: hidden;
+            color: white;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 250px;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-image: radial-gradient(rgba(255, 255, 255, 0.3) 2px, transparent 2px);
+            background-size: 18px 18px;
+            opacity: 0.3;
+        }
+
+        .cta-section::after {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            top: 60px;
+            right: 100px;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.2) 2px, transparent 2px);
+            background-size: 20px 20px;
+            opacity: 0.25;
+        }
+
+        .cta-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .cta-section h2 {
+            font-size: 3rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+
+        .cta-subtitle {
+            max-width: 750px;
+            margin: 0 auto 50px;
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+
+        .cta-buttons .btn {
+            border-radius: 14px;
+            padding: 16px 32px;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .cta-buttons .btn-light:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 40px rgba(255, 255, 255, 0.4);
+        }
+
+        .cta-buttons .btn-outline-light:hover {
+            background: white;
+            color: #2563eb;
+            transform: translateY(-4px);
+        }
+
+        .cta-points {
+            display: flex;
+            justify-content: center;
+            gap: 35px;
+            font-size: 0.95rem;
+            flex-wrap: wrap;
+        }
+
+        /* ===== CONTACT FORM ===== */
+        .contact-section {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        }
+
+        .contact-form {
+            background: white;
+            border-radius: 24px;
+            padding: 50px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .form-control, .form-select {
+            border-radius: 12px;
+            padding: 12px 18px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+
+        .btn-submit {
+            background: linear-gradient(90deg, #2563eb, #7c3aed);
+            color: white;
+            border: none;
+            padding: 14px 40px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(37, 99, 235, 0.5);
+        }
+
+        .success-message {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            color: #065f46;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            display: none;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .success-message.show {
+            display: block;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== FOOTER ===== */
+        .footer-custom {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: #e2e8f0;
+            padding: 80px 0 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .footer-custom::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 4px;
+            top: 0;
+            left: 0;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+        }
+
+        .footer-content {
+            padding-bottom: 40px;
+        }
+
+        .footer-custom h5 {
+            color: white;
+            font-weight: 700;
+            margin-bottom: 25px;
+            font-size: 1.3rem;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .footer-custom h5::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            border-radius: 2px;
+        }
+
+        .footer-custom p {
+            color: #cbd5e1;
+            line-height: 1.8;
+        }
+
+        .footer-custom ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer-custom ul li {
+            margin-bottom: 12px;
+        }
+
+        .footer-custom ul li a {
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .footer-custom ul li a:hover {
+            color: #60a5fa;
+            transform: translateX(5px);
+        }
+
+        .footer-brand {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+        }
+
+        .footer-bottom {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 30px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-bottom p {
+            margin: 8px 0;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .footer-bottom a {
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-bottom a:hover {
+            color: #60a5fa;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-icon {
+            width: 45px;
+            height: 45px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .social-icon:hover {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            transform: translateY(-5px);
+            color: white;
+        }
+
+        /* ===== BACK TO TOP BUTTON ===== */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+            z-index: 999;
+        }
+
+        .back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-to-top:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(37, 99, 235, 0.6);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 992px) {
+            .hero-title { font-size: 2.2rem; }
+            .section-title { font-size: 2rem; }
+            .cta-section h2 { font-size: 2.2rem; }
+            .industries-grid { grid-template-columns: repeat(3, 1fr); }
+            .arrow { display: none; }
+            .qr-label { display: none; }
+            .mobile-demo-title { font-size: 1.7rem; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-title { font-size: 1.8rem; }
+            .section-title { font-size: 1.7rem; }
+            .cta-section h2 { font-size: 1.8rem; }
+            .industries-grid { grid-template-columns: repeat(2, 1fr); }
+            .compare-box { flex-direction: column; }
+            .qr-center {
+                position: relative;
+                transform: none;
+                margin: 20px auto;
+                left: auto;
+                top: auto;
+            }
+            section { padding: 60px 0; }
+            .hero-new { padding: 80px 0 60px; }
+            .contact-form { padding: 30px 20px; }
+            .mobile-mockup { width: 280px; }
+            .mobile-content { padding: 30px 15px; min-height: 450px; }
+            .scan-demo-qr { width: 160px; height: 160px; }
+            .demo-qr-code { width: 120px; height: 120px; }
+            .mobile-demo-title { font-size: 1.5rem; }
+            .mobile-demo-section { margin-top: 50px; padding: 40px 15px; }
+        }
+
+        @media (max-width: 576px) {
+            .mobile-mockup { width: 260px; }
+            .scan-demo-qr { width: 140px; height: 140px; }
+            .demo-qr-code { width: 100px; height: 100px; }
+            .result-text { font-size: 1.1rem; }
+            .rescan-btn { padding: 12px 30px; font-size: 0.95rem; }
+        }
+    </style>
 </head>
 <body>
-<nav>
-  <div class="nav-container">
-    <a href="#" class="nav-logo">
-      <img src="img/logo.png" alt="logo"  srcset="">
- 
-      Qnonce
-    </a>
-    <ul class="nav-links">
-      <li><a href="#about">About</a></li>
-      <li><a href="#technology">Services</a></li>
-      <li><a href="#industries">Industries</a></li>
-      <li><a href="#how-it-works">How It Works</a></li>
-      <li><a href="#contact">Contact</a></li>
-    </ul>
-    <div class="nav-toggle">
-      <span></span>
-      <span></span>
-      <span></span>
-    </div>
-  </div>
-</nav>
+    <!-- SMOOTH NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" href="#home">🔐 SecureQR</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#technology">Technology</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#how-it-works">How It Works</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#clients">Industries</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+                    <li class="nav-item"><a class="btn btn-custom ms-3" href="contact.html">Request Demo</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-<header>
-  <svg class="logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" style="stop-color:#1f78ff;stop-opacity:1" />
-        <stop offset="100%" style="stop-color:#4d9fff;stop-opacity:1" />
-      </linearGradient>
-    </defs>
-    <rect x="10" y="10" width="30" height="30" fill="url(#logoGrad)" rx="5"/>
-    <rect x="60" y="10" width="30" height="30" fill="url(#logoGrad)" rx="5"/>
-    <rect x="10" y="60" width="30" height="30" fill="url(#logoGrad)" rx="5"/>
-    <rect x="60" y="60" width="30" height="30" fill="url(#logoGrad)" rx="5"/>
-    <circle cx="50" cy="50" r="12" fill="white"/>
-    <path d="M 45 50 L 48 53 L 55 45" stroke="url(#logoGrad)" stroke-width="3" fill="none" stroke-linecap="round"/>
-  </svg>
-  <h1>Qnonce</h1>
-  <p>Non-Cloneable QR Code Security</p>
-  <p>Protect your brand from counterfeiting with next-generation non-cloneable QR codes.</p>
-  <a href="#contact" class="btn">Get a Demo</a>
-  <a href="#contact" class="btn">Contact Sales</a>
-</header>
+    <!-- HERO SECTION -->
+    <section id="home" class="hero-new">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start slide-left">
+                    <span class="hero-badge">🔒 Next-Gen Anti-Counterfeit Technology</span>
+                    <h1 class="hero-title">
+                        <span>Non-Clonable QR Codes</span><br>
+                        That Prove Authenticity in Real Time
+                    </h1>
+                    <p class="hero-desc">
+                        Secure your products with AI-verified, server-authenticated QR codes that
+                        <strong>cannot be copied, reused, or faked</strong>.
+                    </p>
+                    <div class="hero-buttons">
+                        <a href="#technology" class="btn btn-primary btn-lg">▶ View Live QR Demo</a>
+                        <a href="#contact" class="btn btn-outline-primary btn-lg">Request Enterprise Access</a>
+                    </div>
+                    <div class="hero-stats">
+                        <div>
+                            <h4><span class="counter" data-target="1000000">0</span>+</h4>
+                            <span>Scans Protected</span>
+                        </div>
+                        <div>
+                            <h4><span class="counter" data-target="99.9">0</span>%</h4>
+                            <span>Accuracy</span>
+                        </div>
+                        <div>
+                            <h4><span class="counter" data-target="0">0</span>%</h4>
+                            <span>Clone Rate</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 text-center mt-5 mt-md-0 slide-right">
+                    <div class="qr-mock">
+                        <div class="qr-grid"></div>
+                        <div class="qr-label top">🟢 Real-time Verification</div>
+                        <div class="qr-label bottom">🔐 Encrypted Hash</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-<section id="about" class="animate-on-scroll">
-  <h2>About Qnonce</h2>
-  <p>
-    Qnonce is a next-generation QR security platform that provides non-cloneable, one-time use QR codes for product authentication, brand protection, and consumer trust.
-    Our technology ensures that every QR code is unique, tamper-proof, and verifiable in real time.
- 
-</section>
+    <!-- PROBLEM SECTION WITH ANIMATED QR -->
+    <section id="technology" class="problem-section">
+        <div class="container text-center">
+            <h2 class="section-title fade-in">
+                The Problem with <span class="danger">Regular QR Codes</span>
+            </h2>
+            <p class="section-subtitle fade-in">
+                Traditional QR codes can be easily photographed, copied, and printed by fraudsters,
+                leading to counterfeit products and brand damage.
+            </p>
+            <div class="compare-box fade-in">
+                <div class="compare-side unsafe">
+                    <h5>← Regular QR (Unsafe)</h5>
+                    <ul>
+                        <li>✗ Can be copied</li>
+                        <li>✗ Can be cloned</li>
+                        <li>✗ Reusable by fraudsters</li>
+                        <li>✗ No real verification</li>
+                    </ul>
+                </div>
+                <div class="qr-center">
+                    <div class="qr-card-animated">
+                        <div class="qr-dots-animated"></div>
+                        <div class="scan-line"></div>
+                        <div class="qr-status unsafe-status">
+                            <span class="status-icon">✗</span>
+                            <span class="status-text">CLONED</span>
+                        </div>
+                        <div class="qr-status safe-status">
+                            <span class="status-icon">✓</span>
+                            <span class="status-text">VERIFIED</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="compare-side safe">
+                    <h5>Non-Clonable QR (Secure) →</h5>
+                    <ul>
+                        <li>✓ Impossible to copy</li>
+                        <li>✓ Server-verified</li>
+                        <li>✓ One-time use only</li>
+                        <li>✓ Real-time validation</li>
+                    </ul>
+                </div>
+            </div>
 
-<section id="technology" class="animate-on-scroll">
-  <h2>Our Technology</h2>
-  <p>
-    Qnonce uses dynamic encryption and server-side verification to generate QR codes that cannot be duplicated or reused.
-    Each scan validates authenticity in real time, ensuring protection against counterfeit products.
-  </p>
- 
-  
-  <div class="qr-showcase">
-    <div class="qr-container">
-      <div class="qr-image">
-        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-          <!-- QR Code Pattern -->
-          <rect x="20" y="20" width="30" height="30" fill="#0b1f3a"/>
-          <rect x="60" y="20" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="80" y="20" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="100" y="20" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="150" y="20" width="30" height="30" fill="#0b1f3a"/>
-          
-          <rect x="20" y="30" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="40" y="30" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="70" y="30" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="90" y="30" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="150" y="30" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="170" y="30" width="10" height="10" fill="#0b1f3a"/>
-          
-          <rect x="20" y="40" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="40" y="40" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="60" y="40" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="110" y="40" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="150" y="40" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="170" y="40" width="10" height="10" fill="#0b1f3a"/>
-          
-          <rect x="60" y="60" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="80" y="60" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="100" y="60" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="120" y="60" width="10" height="10" fill="#0b1f3a"/>
-          
-          <rect x="20" y="70" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="50" y="70" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="70" y="70" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="110" y="70" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="140" y="70" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="170" y="70" width="10" height="10" fill="#0b1f3a"/>
-          
-          <rect x="30" y="80" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="60" y="80" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="90" y="80" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="130" y="80" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="160" y="80" width="10" height="10" fill="#0b1f3a"/>
-          
-          <!-- Center logo area -->
-          <rect x="80" y="80" width="40" height="40" fill="white" stroke="#1f78ff" stroke-width="2"/>
-          <circle cx="100" cy="100" r="15" fill="#1f78ff"/>
-          <path d="M 95 100 L 98 103 L 105 95" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
-          
-          <rect x="40" y="90" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="140" y="90" width="10" height="10" fill="#0b1f3a"/>
-          
-          <rect x="20" y="100" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="50" y="100" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="150" y="100" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="180" y="100" width="10" height="10" fill="#0b1f3a"/>
-          
-          <rect x="30" y="110" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="140" y="110" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="170" y="110" width="10" height="10" fill="#0b1f3a"/>
-          
-          <rect x="60" y="130" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="90" y="130" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="120" y="130" width="10" height="10" fill="#0b1f3a"/>
-          
-          <rect x="20" y="150" width="30" height="30" fill="#0b1f3a"/>
-          <rect x="70" y="150" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="100" y="150" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="130" y="150" width="10" height="10" fill="#0b1f3a"/>
-          
-          <rect x="20" y="160" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="40" y="160" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="80" y="160" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="110" y="160" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="150" y="160" width="10" height="10" fill="#0b1f3a"/>
-          
-          <rect x="20" y="170" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="40" y="170" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="60" y="170" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="90" y="170" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="140" y="170" width="10" height="10" fill="#0b1f3a"/>
-          <rect x="170" y="170" width="10" height="10" fill="#0b1f3a"/>
-        </svg>
-      </div>
-      <div class="qr-label">🔒 Non-Cloneable QR Code</div>
-    </div>
-  </div>
-  
-  <div class="features">
-    <div class="card">
-      <h3>🔐</h3>
-      One-time scan QR codes
-    </div>
-    <div class="card">
-      <h3>⚡</h3>
-      Real-time verification
-    </div>
-    <div class="card">
-      <h3>🛡️</h3>
-      Tamper-proof architecture
-    </div>
-    <div class="card">
-      <h3>🔄</h3>
-      Dynamic QR regeneration
-    </div>
-    <div class="card">
-      <h3>☁️</h3>
-      Cloud-based dashboard
-    </div>
-    <div class="card">
-      <h3>🔌</h3>
-      API integration
-    </div>
-  </div>
-</section>
+            <!-- MOBILE DEMO SECTION -->
+            <div class="mobile-demo-section fade-in">
+                <h3 class="mobile-demo-title">See It In Action 📱</h3>
+                <div class="mobile-mockup">
+                    <div class="mobile-screen">
+                        <div class="mobile-header">
+                            <div class="time">9:41</div>
+                            <div class="notch"></div>
+                            <div class="signal">📶 🔋</div>
+                        </div>
+                        <div class="mobile-content">
+                            <div class="scan-demo-qr">
+                                <div class="demo-qr-code"></div>
+                                <div class="demo-scan-line"></div>
+                            </div>
+                            <div class="verification-result">
+                                <div class="result-icon"></div>
+                                <div class="result-text">Ready to Scan</div>
+                                <div class="result-details">Tap button below to verify</div>
+                            </div>
+                            <button class="rescan-btn">Tap to Scan</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-<section id="industries" class="animate-on-scroll">
-  <h2>Solutions by Industry</h2>
-  <p style="text-align: center; font-size: 1.1em; margin-bottom: 40px;">Tailored non-cloneable QR solutions for every sector</p>
-  
-  <div class="industries">
-    <div class="card">
-      <h3>💊 Pharma QR Code</h3>
-      <p><strong>Use:</strong> Tablets, syrups, injections, strips, bottles</p>
-      <p><strong>Purpose:</strong></p>
-      <ul>
-        <li>Stop fake medicines</li>
-        <li>Verify genuine product</li>
-        <li>Track batch & expiry</li>
-      </ul>
-      <p><strong>Features:</strong></p>
-      <ul>
-        <li>✓ One-time scan only</li>
-        <li>✓ Product name, batch no., expiry date</li>
-        <li>✓ Real-time server verification</li>
-        <li>✓ Alerts if scanned twice</li>
-        <li>✓ Geo-location tracking</li>
-        <li>✓ "Genuine / Fake" screen</li>
-      </ul>
-    </div>
-    
-    <div class="card">
-      <h3>🥤 Drink QR Code</h3>
-      <p><strong>Use:</strong> Water bottles, energy drinks, juice, cold drinks</p>
-      <p><strong>Purpose:</strong></p>
-      <ul>
-        <li>Prevent bottle duplication</li>
-        <li>Verify original filling</li>
-        <li>Customer trust</li>
-      </ul>
-      <p><strong>Features:</strong></p>
-      <ul>
-        <li>✓ Non-cloneable dynamic QR</li>
-        <li>✓ Scan count limit (1 or 2)</li>
-        <li>✓ Manufacturing date info</li>
-        <li>✓ Distributor tracking</li>
-        <li>✓ Loyalty points / offers</li>
-        <li>✓ Fake scan warning</li>
-      </ul>
-    </div>
-    
-    <div class="card">
-      <h3>🍱 Food Product QR Code</h3>
-      <p><strong>Use:</strong> Packaged food, snacks, dairy products, ready-to-eat meals</p>
-      <p><strong>Purpose:</strong></p>
-      <ul>
-        <li>Product traceability</li>
-        <li>Food safety</li>
-        <li>Anti-counterfeit</li>
-      </ul>
-      <p><strong>Features:</strong></p>
-      <ul>
-        <li>✓ One-time authentication</li>
-        <li>✓ Ingredient & nutrition info</li>
-        <li>✓ FSSAI license display</li>
-        <li>✓ Expiry date validation</li>
-        <li>✓ Supply chain tracking</li>
-        <li>✓ Recall alert system</li>
-      </ul>
-    </div>
-    
-    <div class="card">
-      <h3>👕 Fashion QR Code</h3>
-      <p><strong>Use:</strong> Apparel brands, footwear, luxury fashion items</p>
-      <p><strong>Purpose:</strong></p>
-      <ul>
-        <li>Stop fake branded clothes</li>
-        <li>Verify original brand item</li>
-        <li>Brand story & care guide</li>
-      </ul>
-      <p><strong>Features:</strong></p>
-      <ul>
-        <li>✓ Unique QR per item</li>
-        <li>✓ One-time verification</li>
-        <li>✓ Product serial number</li>
-        <li>✓ Warranty registration</li>
-        <li>✓ Owner transfer option</li>
-        <li>✓ Anti-resale fraud protection</li>
-      </ul>
-    </div>
-    
-    <div class="card">
-      <h3>🎨 Design QR Code</h3>
-      <p><strong>Use:</strong> Digital art, certificates, legal documents, product designs</p>
-      <p><strong>Purpose:</strong></p>
-      <ul>
-        <li>Protect originality</li>
-        <li>Prove authenticity</li>
-        <li>Ownership verification</li>
-      </ul>
-      <p><strong>Features:</strong></p>
-      <ul>
-        <li>✓ One-time scan or view</li>
-        <li>✓ Document hash verification</li>
-        <li>✓ Timestamped records</li>
-        <li>✓ Tamper detection</li>
-        <li>✓ Owner verification</li>
-        <li>✓ Copy-proof access</li>
-      </ul>
-    </div>
-    
-    <div class="card">
-      <h3>🔧 Auto Parts QR Code</h3>
-      <p><strong>Use:</strong> Engine parts, brake pads, filters, electronic parts</p>
-      <p><strong>Purpose:</strong></p>
-      <ul>
-        <li>Stop fake spare parts</li>
-        <li>Verify manufacturer</li>
-        <li>Warranty validation</li>
-      </ul>
-      <p><strong>Features:</strong></p>
-      <ul>
-        <li>✓ One-time use QR</li>
-        <li>✓ Serial number matching</li>
-        <li>✓ Warranty activation</li>
-        <li>✓ Service center verification</li>
-        <li>✓ Dealer tracking</li>
-        <li>✓ Fake part alert</li>
-      </ul>
-    </div>
-    
-    <div class="card">
-      <h3>📦 Parcel Lock QR Code</h3>
-      <p><strong>About:</strong> Employee-only, location-locked verification for secure internal parcels</p>
-      <p><strong>Use:</strong> Internal company parcels, restricted deliveries, secure handovers</p>
-      <p><strong>Purpose:</strong></p>
-      <ul>
-        <li>Secure internal company parcels</li>
-        <li>Prevent unauthorized access</li>
-        <li>Stop internal theft or tampering</li>
-        <li>Track parcel handovers</li>
-        <li>Enforce location-based scanning</li>
-      </ul>
-      <p><strong>Key Features:</strong></p>
-      <ul>
-        <li>✓ Non-cloneable dynamic QR code</li>
-        <li>✓ Employee login required to scan</li>
-        <li>✓ Location-locked scanning (geo-fencing)</li>
-        <li>✓ One-time or multi-step scan flow</li>
-        <li>✓ Handover verification logs</li>
-        <li>✓ Timestamped scan history</li>
-        <li>✓ Unauthorized scan alerts</li>
-        <li>✓ Device ID binding</li>
-        <li>✓ Role-based access control</li>
-        <li>✓ Admin dashboard monitoring</li>
-      </ul>
-    </div>
-  </div>
-</section>
+    <!-- SOLUTION SECTION -->
+    <section class="solution-section">
+        <div class="container">
+            <div class="solution-box text-center fade-in">
+                <h2 class="section-title">Our <span>Solution</span></h2>
+                <p class="section-subtitle">
+                    We provide <strong>next-generation non-clonable QR codes</strong> that authenticate
+                    products in real time. Every scan is validated through a secure backend using:
+                </p>
+                <div class="solution-cards">
+                    <div class="solution-card">
+                        <div class="icon blue">🔐</div>
+                        <h5>Cryptographic Signatures</h5>
+                        <p>Each QR contains encrypted data that cannot be replicated</p>
+                    </div>
+                    <div class="solution-card">
+                        <div class="icon purple">🛡️</div>
+                        <h5>Scan Limits</h5>
+                        <p>One QR → one genuine verification, repeated scans are flagged</p>
+                    </div>
+                    <div class="solution-card">
+                        <div class="icon violet">📱</div>
+                        <h5>Device Fingerprinting</h5>
+                        <p>Track scan location, device, and behavioral patterns</p>
+                    </div>
+                </div>
+                <p class="solution-footer">
+                    Built for <strong>medicines, FMCG, documents, luxury goods</strong>, and any
+                    high-value products that need protection
+                </p>
+            </div>
+        </div>
+    </section>
 
-<section id="core-features" class="animate-on-scroll">
-  <h2>Common Core Features</h2>
-  <p style="text-align: center; font-size: 1.1em; margin-bottom: 40px;">Powerful capabilities across all QR solutions</p>
-  <div class="features">
-    <div class="card">✔ Non-cloneable QR generation</div>
-    <div class="card">✔ One-time scan logic</div>
-    <div class="card">✔ Server-side verification</div>
-    <div class="card">✔ Dynamic QR mapping</div>
-    <div class="card">✔ API integration</div>
-    <div class="card">✔ Admin dashboard</div>
-    <div class="card">✔ Scan analytics</div>
-    <div class="card">✔ Geo-tracking</div>
-    <div class="card">✔ Fake scan alerts</div>
-    <div class="card">✔ Product lifecycle tracking</div>
-  </div>
-</section>
+    <!-- FEATURES SECTION -->
+    <section id="features" class="features-section">
+        <div class="container text-center">
+            <h2 class="section-title fade-in">Core <span>Features</span></h2>
+            <p class="section-subtitle fade-in">
+                Enterprise-grade security features designed to protect your brand and customers
+            </p>
+            <div class="row g-4 mt-4">
+                <div class="col-md-4 fade-in">
+                    <div class="feature-card">
+                        <div class="icon blue">🔐</div>
+                        <h5>Non-Clonable QR Engine</h5>
+                        <p>Dynamic QR codes linked with encrypted server validation that cannot be duplicated or reused.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 fade-in">
+                    <div class="feature-card">
+                        <div class="icon purple">✔️</div>
+                        <h5>Scan-Based Authentication</h5>
+                        <p>One QR → one genuine verification only. All subsequent scans are automatically flagged.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 fade-in">
+                    <div class="feature-card">
+                        <div class="icon violet">📱</div>
+                        <h5>Image-Based Result Animation</h5>
+                        <p>Beautiful animated results showing Authentic or Fake status with smooth motion UX.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 fade-in">
+                    <div class="feature-card">
+                        <div class="icon pink">📊</div>
+                        <h5>Backend Dashboard</h5>
+                        <p>Analytics for scans, locations, attempts, fraud alerts, and behavioral patterns.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 fade-in">
+                    <div class="feature-card">
+                        <div class="icon indigo">💻</div>
+                        <h5>API & SDK Integration</h5>
+                        <p>Easy integration with packaging systems, mobile apps, ERP, and infrastructure.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 fade-in">
+                    <div class="feature-card">
+                        <div class="icon orange">🌐</div>
+                        <h5>Global Scalability</h5>
+                        <p>Deploy worldwide with multi-language support and cloud infrastructure.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-<section id="how-it-works" class="animate-on-scroll">
-  <h2>How It Works</h2>
-  <div class="steps">
-    <div class="card">1. Generate a unique non-cloneable QR code</div>
-    <div class="card">2. Print it on your product</div>
-    <div class="card">3. Customer scans the QR</div>
-    <div class="card">4. System verifies authenticity</div>
-    <div class="card">5. Shows "Genuine" or "Fake" status</div>
-  </div>
-</section>
+    <!-- HOW IT WORKS -->
+    <section id="how-it-works" class="how-section">
+        <div class="container text-center">
+            <h2 class="section-title fade-in">How It <span>Works</span></h2>
+            <p class="section-subtitle fade-in">
+                A simple, secure process that happens in milliseconds
+            </p>
+            <div class="how-steps">
+                <div class="how-card fade-in">
+                    <div class="step-number">01</div>
+                    <div class="icon blue">📷</div>
+                    <h5>Customer Scans QR</h5>
+                    <p>Customer scans the QR code from product packaging using any smartphone camera</p>
+                </div>
+                <div class="arrow">→</div>
+                <div class="how-card fade-in">
+                    <div class="step-number">02</div>
+                    <div class="icon purple">🛡️</div>
+                    <h5>Secure Verification</h5>
+                    <p>QR hash + device data is sent to our secure backend server for real-time validation</p>
+                </div>
+                <div class="arrow">→</div>
+                <div class="how-card fade-in">
+                    <div class="step-number">03</div>
+                    <div class="icon violet">✔️</div>
+                    <h5>Animated Result</h5>
+                    <p>✓ Green = Authentic<br>✗ Red = Duplicate / Cloned detected</p>
+                </div>
+                <div class="arrow">→</div>
+                <div class="how-card fade-in">
+                    <div class="step-number">04</div>
+                    <div class="icon pink">📈</div>
+                    <h5>Brand Trust Created</h5>
+                    <p>Customer confidence increases and your brand is protected from counterfeits</p>
+                </div>
+            </div>
+            <div class="speed-pill">
+                ⚡ Complete verification in <strong>under 1 second</strong>
+            </div>
+        </div>
+    </section>
 
-<section id="contact" class="animate-on-scroll">
-  <h2>Contact Qnonce</h2>
-  <p>Have questions or need a demo?</p>
-  <p><strong>Phone:</strong> 7352591702</p>
-  <p><strong>Email:</strong> info@qnonce.com</p>
-</section>
+    <!-- WHY CHOOSE -->
+    <section class="why-section">
+        <div class="container text-center">
+            <h2 class="section-title fade-in">Why Choose <span>SecureQR</span></h2>
+            <p class="section-subtitle fade-in">
+                Comprehensive protection with cutting-edge technology
+            </p>
+            <div class="row justify-content-center g-4 mt-4">
+                <div class="col-md-4 fade-in">
+                    <div class="why-card">
+                        <div class="icon blue">🔐</div>
+                        <h5>Impossible to Clone</h5>
+                        <p>Cryptographic security ensures QR codes cannot be duplicated or reused</p>
+                    </div>
+                </div>
+                <div class="col-md-4 fade-in">
+                    <div class="why-card highlight">
+                        <div class="icon purple">⚡</div>
+                        <h5 class="highlight-title">Real-Time Validation</h5>
+                        <p>Lightning-fast server verification in under 1 second</p>
+                    </div>
+                </div>
+                <div class="col-md-4 fade-in">
+                    <div class="why-card">
+                        <div class="icon violet">📈</div>
+                        <h5>Live Analytics</h5>
+                        <p>Track scans, locations, attempts, and fraud detection in real time</p>
+                    </div>
+                </div>
+                <div class="col-md-4 fade-in">
+                    <div class="why-card">
+                        <div class="icon pink">🌍</div>
+                        <h5>Works Worldwide</h5>
+                        <p>Any device, any location – seamless global authentication</p>
+                    </div>
+                </div>
+                <div class="col-md-4 fade-in">
+                    <div class="why-card">
+                        <div class="icon orange">🏭</div>
+                        <h5>Industry-Ready</h5>
+                        <p>Perfect for pharma, FMCG, certificates, luxury goods & documents</p>
+                    </div>
+                </div>
+                <div class="col-md-4 fade-in">
+                    <div class="why-card">
+                        <div class="icon green">💲</div>
+                        <h5>Cost-Effective</h5>
+                        <p>Affordable pricing with maximum ROI and brand protection</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-<footer>
-  <p>© 2026 Qnonce Pvt. Ltd. All rights reserved.</p>
-</footer>
+    <!-- INDUSTRIES -->
+    <section id="clients" class="industries-section">
+        <div class="container">
+            <div class="industries-box text-center fade-in">
+                <h2 class="section-title">Trusted by Leading <span>Industries</span></h2>
+                <p class="section-subtitle">
+                    Our non-clonable QR technology protects brands across multiple sectors
+                </p>
+                <div class="industries-grid">
+                    <div class="industry-card">
+                        <div class="industry-icon">💊</div>
+                        <p>Pharmaceutical</p>
+                    </div>
+                    <div class="industry-card">
+                        <div class="industry-icon">🛒</div>
+                        <p>FMCG</p>
+                    </div>
+                    <div class="industry-card">
+                        <div class="industry-icon">🏭</div>
+                        <p>Manufacturing</p>
+                    </div>
+                    <div class="industry-card">
+                        <div class="industry-icon">💎</div>
+                        <p>Luxury Goods</p>
+                    </div>
+                    <div class="industry-card">
+                        <div class="industry-icon">📄</div>
+                        <p>Documents</p>
+                    </div>
+                    <div class="industry-card">
+                        <div class="industry-icon">📱</div>
+                        <p>Electronics</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-<script>
-  // Mobile menu toggle
-  const navToggle = document.querySelector('.nav-toggle');
-  const navLinks = document.querySelector('.nav-links');
-  
-  navToggle.addEventListener('click', () => {
-    navToggle.classList.toggle('active');
-    navLinks.classList.toggle('active');
-  });
-  
-  // Close menu when clicking on a link
-  document.querySelectorAll('.nav-links a').forEach(link => {
-    link.addEventListener('click', () => {
-      navToggle.classList.remove('active');
-      navLinks.classList.remove('active');
-    });
-  });
-  
-  // Navbar scroll effect
-  const nav = document.querySelector('nav');
-  window.addEventListener('scroll', () => {
-    if (window.scrollY > 50) {
-      nav.classList.add('scrolled');
-    } else {
-      nav.classList.remove('scrolled');
-    }
-  });
-  
-  // Smooth scrolling for anchor links
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-      e.preventDefault();
-      const target = document.querySelector(this.getAttribute('href'));
-      if (target) {
-        const navHeight = nav.offsetHeight;
-        const targetPosition = target.offsetTop - navHeight;
-        window.scrollTo({ 
-          top: targetPosition, 
-          behavior: 'smooth' 
+    <!-- TESTIMONIALS -->
+    <section class="section bg-light">
+        <div class="container">
+            <h2 class="section-title text-center fade-in">Trusted by Industry <span>Leaders</span></h2>
+            <p class="section-subtitle text-center fade-in">See what our clients say about SecureQR</p>
+            <div class="testimonial fade-in">
+                <p>"This QR system stopped counterfeit medicines instantly. Our customers now trust our products completely. The real-time verification gives us peace of mind."</p>
+                <p>👩‍⚕️ Dr. Priya Sharma, Chief Quality Officer, PharmaCare Ltd</p>
+            </div>
+            <div class="testimonial fade-in">
+                <p>"Deployed across 50,000+ products. Zero cloning incidents since implementation. The dashboard analytics help us track every scan attempt."</p>
+                <p>👨‍💼 Rajesh Kumar, Supply Chain Director, FMCG Global</p>
+            </div>
+            <div class="testimonial fade-in">
+                <p>"Our high-value products are now completely protected. The animated verification process creates an amazing customer experience."</p>
+                <p>👩‍💼 Sarah Johnson, Brand Protection Manager, LuxuryBrand</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECURITY STANDARDS -->
+    <section class="security-section">
+        <div class="container">
+            <div class="security-box text-center fade-in">
+                <h2 class="security-title">Security Standards</h2>
+                <div class="security-items">
+                    <div class="security-item">
+                        <div class="security-icon">🔐</div>
+                        <p>ISO-Ready Architecture</p>
+                    </div>
+                    <div class="security-item">
+                        <div class="security-icon">🛡️</div>
+                        <p>Encrypted APIs</p>
+                    </div>
+                    <div class="security-item">
+                        <div class="security-icon">☁️</div>
+                        <p>Cloud-Based Uptime</p>
+                    </div>
+                    <div class="security-item">
+                        <div class="security-icon">✅</div>
+                        <p>99.9% Accuracy</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTACT FORM SECTION -->
+    <section id="contact" class="contact-section">
+        <div class="container">
+            <h2 class="section-title text-center fade-in">Get in <span>Touch</span></h2>
+            <p class="section-subtitle text-center fade-in">
+                Ready to protect your products? Fill out the form and our team will contact you within 24 hours
+            </p>
+            <div class="contact-form fade-in">
+                <form id="contactForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Full Name *</label>
+                            <input type="text" class="form-control" name="name" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Email Address *</label>
+                            <input type="email" class="form-control" name="email" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Company Name</label>
+                            <input type="text" class="form-control" name="company">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" name="phone">
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">Industry</label>
+                            <select class="form-select" name="industry">
+                                <option value="">Select your industry</option>
+                                <option value="pharmaceutical">Pharmaceutical</option>
+                                <option value="fmcg">FMCG</option>
+                                <option value="manufacturing">Manufacturing</option>
+                                <option value="luxury">Luxury Goods</option>
+                                <option value="documents">Documents</option>
+                                <option value="electronics">Electronics</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">Message *</label>
+                            <textarea class="form-control" name="message" rows="5" required placeholder="Tell us about your anti-counterfeit needs..."></textarea>
+                        </div>
+                        <div class="col-md-12 text-center">
+                            <button type="submit" class="btn btn-submit">
+                                Send Message 🚀
+                            </button>
+                        </div>
+                    </div>
+                    <div class="success-message" id="successMessage">
+                        ✓ Thank you! Your message has been sent successfully. We'll get back to you within 24 hours.
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA SECTION -->
+    <section id="demo" class="cta-section">
+        <div class="container text-center cta-content">
+            <h2 class="fade-in">Stop Counterfeits Before They Reach<br>Your Customers</h2>
+            <p class="cta-subtitle fade-in">
+                Join hundreds of leading brands protecting their products and building trust
+                with non-clonable QR technology. See it in action today.
+            </p>
+            <div class="cta-buttons fade-in">
+                <a href="#contact" class="btn btn-light btn-lg">▶ Get Live QR Demo</a>
+                <a href="#contact" class="btn btn-outline-light btn-lg">Talk to Security Expert</a>
+            </div>
+            <div class="cta-points fade-in">
+                <span>✓ No Credit Card Required</span>
+                <span>✓ Free Trial Available</span>
+                <span>✓ Setup in 24 Hours</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- DISTINCTIVE FOOTER -->
+    <footer class="footer-custom">
+        <div class="container footer-content">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="footer-brand">SecureQR</div>
+                    <p>Next-generation non-clonable QR code platform protecting brands worldwide with AI-verified, server-authenticated anti-counterfeit technology.</p>
+                    <div class="social-icons">
+                        <a href="#" class="social-icon">📘</a>
+                        <a href="#" class="social-icon">🐦</a>
+                        <a href="#" class="social-icon">💼</a>
+                        <a href="#" class="social-icon">📧</a>
+                    </div>
+                </div>
+                <div class="col-md-2 mb-4">
+                    <h5>Product</h5>
+                    <ul>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#how-it-works">How It Works</a></li>
+                        <li><a href="#technology">Technology</a></li>
+                        <li><a href="#demo">Demo</a></li>
+                        <li><a href="#">Pricing</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-2 mb-4">
+                    <h5>Company</h5>
+                    <ul>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#clients">Clients</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Press</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <h5>Contact Us</h5>
+                    <p>📧 info@secureqr.com<br>
+                    📞 +1 (123) 456-7890<br>
+                    📍 Tech Innovation Hub<br>
+                    Silicon Valley, CA 94025</p>
+                    <p style="margin-top: 20px;">
+                        <span style="background: linear-gradient(90deg, #3b82f6, #8b5cf6); padding: 4px 10px; border-radius: 6px; font-size: 0.85rem; margin-right: 8px;">🔒 ISO 27001</span>
+                        <span style="background: linear-gradient(90deg, #8b5cf6, #ec4899); padding: 4px 10px; border-radius: 6px; font-size: 0.85rem; margin-right: 8px;">✓ GDPR</span>
+                        <span style="background: linear-gradient(90deg, #ec4899, #f97316); padding: 4px 10px; border-radius: 6px; font-size: 0.85rem;">🛡️ SOC 2</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container text-center">
+                <p>&copy; 2026 SecureQR. All rights reserved. | Protecting 1M+ products worldwide.</p>
+                <p>
+                    <a href="#">Privacy Policy</a> | 
+                    <a href="#">Terms of Service</a> | 
+                    <a href="#">Cookie Policy</a> | 
+                    <a href="#">Security</a>
+                </p>
+                <p>Powered by cryptographic hash algorithms and real-time server validation.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- BACK TO TOP BUTTON -->
+    <div class="back-to-top" id="backToTop">
+        ↑
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ===== NAVBAR SCROLL EFFECT =====
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar-custom');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
         });
-      }
-    });
-  });
 
-  // Scroll animation observer
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-      }
-    });
-  }, { threshold: 0.1 });
+        // ===== SMOOTH SCROLL FOR NAVIGATION =====
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                    const navbarCollapse = document.querySelector('.navbar-collapse');
+                    if (navbarCollapse.classList.contains('show')) {
+                        navbarCollapse.classList.remove('show');
+                    }
+                }
+            });
+        });
 
-  document.querySelectorAll('.animate-on-scroll').forEach(el => {
-    observer.observe(el);
-  });
-</script>
+        // ===== COUNTER ANIMATION =====
+        function animateCounter(element, target, duration = 2000) {
+            let current = 0;
+            const increment = target / (duration / 16);
+            const isDecimal = target % 1 !== 0;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    element.textContent = isDecimal ? target.toFixed(1) : Math.floor(target).toLocaleString();
+                    clearInterval(timer);
+                } else {
+                    element.textContent = isDecimal ? current.toFixed(1) : Math.floor(current).toLocaleString();
+                }
+            }, 16);
+        }
+
+        // ===== SCROLL REVEAL ANIMATION =====
+        function revealOnScroll() {
+            const elements = document.querySelectorAll('.fade-in, .slide-left, .slide-right');
+            
+            elements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                const windowHeight = window.innerHeight;
+                
+                if (elementTop < windowHeight - 100) {
+                    element.classList.add('visible');
+                }
+            });
+        }
+
+        // ===== TRIGGER COUNTER ON SCROLL =====
+        let counterTriggered = false;
+        function checkCounterTrigger() {
+            if (counterTriggered) return;
+            
+            const statsSection = document.querySelector('.hero-stats');
+            if (!statsSection) return;
+            
+            const rect = statsSection.getBoundingClientRect();
+            const isVisible = rect.top < window.innerHeight && rect.bottom >= 0;
+            
+            if (isVisible) {
+                counterTriggered = true;
+                document.querySelectorAll('.counter').forEach(counter => {
+                    const target = parseFloat(counter.getAttribute('data-target'));
+                    animateCounter(counter, target);
+                });
+            }
+        }
+
+        // ===== BACK TO TOP BUTTON =====
+        const backToTop = document.getElementById('backToTop');
+        
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 300) {
+                backToTop.classList.add('show');
+            } else {
+                backToTop.classList.remove('show');
+            }
+        });
+
+        backToTop.addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        // ===== CONTACT FORM SUBMISSION =====
+        const contactForm = document.getElementById('contactForm');
+        const successMessage = document.getElementById('successMessage');
+
+        contactForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                name: this.name.value,
+                email: this.email.value,
+                company: this.company.value,
+                phone: this.phone.value,
+                industry: this.industry.value,
+                message: this.message.value
+            };
+            
+            console.log('Form submitted:', formData);
+            
+            setTimeout(() => {
+                successMessage.classList.add('show');
+                contactForm.reset();
+                
+                setTimeout(() => {
+                    successMessage.classList.remove('show');
+                }, 5000);
+            }, 500);
+        });
+
+        // ===== ANIMATED QR CODE COMPARISON =====
+        function animateQRComparison() {
+            const unsafeStatus = document.querySelector('.unsafe-status');
+            const safeStatus = document.querySelector('.safe-status');
+            
+            if (!unsafeStatus || !safeStatus) return;
+            
+            let currentState = 0;
+            const states = [
+                { unsafe: true, safe: false, duration: 3000 },
+                { unsafe: false, safe: true, duration: 3000 }
+            ];
+            
+            function showState() {
+                const state = states[currentState];
+                
+                unsafeStatus.classList.remove('active');
+                safeStatus.classList.remove('active');
+                
+                setTimeout(() => {
+                    if (state.unsafe) {
+                        unsafeStatus.classList.add('active');
+                    } else if (state.safe) {
+                        safeStatus.classList.add('active');
+                    }
+                }, 2500);
+                
+                setTimeout(() => {
+                    currentState = (currentState + 1) % states.length;
+                    showState();
+                }, state.duration);
+            }
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        showState();
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.5 });
+            
+            const qrCard = document.querySelector('.qr-card-animated');
+            if (qrCard) {
+                observer.observe(qrCard);
+            }
+        }
+
+        // ===== MOBILE DEMO ANIMATION =====
+        function initMobileDemo() {
+            const rescanBtn = document.querySelector('.rescan-btn');
+            const resultIcon = document.querySelector('.result-icon');
+            const resultText = document.querySelector('.result-text');
+            const resultDetails = document.querySelector('.result-details');
+            const verificationResult = document.querySelector('.verification-result');
+            
+            if (!rescanBtn || !resultIcon || !resultText || !resultDetails) return;
+            
+            let scanCount = 0;
+            const scenarios = [
+                {
+                    type: 'authentic',
+                    text: 'Product Verified ✓',
+                    details: 'Authentic • First Scan • Mumbai, India',
+                    duration: 2500
+                },
+                {
+                    type: 'fake',
+                    text: 'Warning: Cloned QR',
+                    details: 'Duplicate Detected • Scanned 47 times',
+                    duration: 2500
+                }
+            ];
+            
+            function performScan() {
+                rescanBtn.disabled = true;
+                rescanBtn.textContent = 'Scanning...';
+                
+                verificationResult.className = 'verification-result result-scanning';
+                resultIcon.className = 'result-icon';
+                resultText.textContent = 'Scanning...';
+                resultDetails.textContent = 'Verifying with secure server...';
+                
+                const scenario = scenarios[scanCount % scenarios.length];
+                
+                setTimeout(() => {
+                    verificationResult.className = `verification-result result-${scenario.type}`;
+                    resultText.textContent = scenario.text;
+                    resultDetails.textContent = scenario.details;
+                    
+                    rescanBtn.disabled = false;
+                    rescanBtn.textContent = 'Scan Again';
+                    
+                    scanCount++;
+                }, scenario.duration);
+            }
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        setTimeout(() => {
+                            performScan();
+                        }, 500);
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.5 });
+            
+            const mobileDemo = document.querySelector('.mobile-demo-section');
+            if (mobileDemo) {
+                observer.observe(mobileDemo);
+            }
+            
+            rescanBtn.addEventListener('click', performScan);
+            
+            setInterval(() => {
+                if (!rescanBtn.disabled && document.querySelector('.mobile-demo-section')) {
+                    const rect = document.querySelector('.mobile-demo-section').getBoundingClientRect();
+                    const isVisible = rect.top < window.innerHeight && rect.bottom >= 0;
+                    if (isVisible) {
+                        performScan();
+                    }
+                }
+            }, 8000);
+        }
+
+        // ===== INITIALIZE ON LOAD =====
+        window.addEventListener('load', function() {
+            revealOnScroll();
+            checkCounterTrigger();
+        });
+
+        // ===== SCROLL EVENT LISTENERS =====
+        window.addEventListener('scroll', function() {
+            revealOnScroll();
+            checkCounterTrigger();
+        });
+
+        // ===== INITIALIZE ANIMATIONS ON LOAD =====
+        document.addEventListener('DOMContentLoaded', function() {
+            animateQRComparison();
+            initMobileDemo();
+        });
+
+        console.log('%c🔐 SecureQR', 'font-size: 24px; font-weight: bold; color: #2563eb;');
+        console.log('%cWebsite loaded successfully!', 'font-size: 14px; color: #64748b;');
+    </script>
 </body>
 </html>
