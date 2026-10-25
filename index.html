@@ -18,7 +18,7 @@
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 
-  <link rel="stylesheet" href="css/website.css" />
+  <link rel="stylesheet" href="website.css" />
 </head>
 
 <body>
@@ -51,7 +51,7 @@
       <div class="header-actions">
         <a href="contact.html" class="header-demo-btn">Request Demo</a>
 
-        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu">
+        <button class="mobile-menu-btn" id="mobileMenuBtn" type="button" aria-label="Open menu" aria-controls="siteNav" aria-expanded="false">
           <i class="fa-solid fa-bars"></i>
         </button>
       </div>
@@ -550,6 +550,51 @@
   </footer>
 
   <script src="js/website.js"></script>
+  <script>
+    (function () {
+      const menuButton = document.getElementById("mobileMenuBtn");
+      const siteNav = document.getElementById("siteNav");
+      if (!menuButton || !siteNav) return;
+
+      const closeMenu = () => {
+        siteNav.classList.remove("show");
+        menuButton.setAttribute("aria-expanded", "false");
+        menuButton.setAttribute("aria-label", "Open menu");
+        const icon = menuButton.querySelector("i");
+        if (icon) icon.className = "fa-solid fa-bars";
+      };
+
+      const openMenu = () => {
+        siteNav.classList.add("show");
+        menuButton.setAttribute("aria-expanded", "true");
+        menuButton.setAttribute("aria-label", "Close menu");
+        const icon = menuButton.querySelector("i");
+        if (icon) icon.className = "fa-solid fa-xmark";
+      };
+
+      menuButton.addEventListener("click", function () {
+        siteNav.classList.contains("show") ? closeMenu() : openMenu();
+      });
+
+      siteNav.querySelectorAll("a").forEach(function (link) {
+        link.addEventListener("click", closeMenu);
+      });
+
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") closeMenu();
+      });
+
+      document.addEventListener("click", function (event) {
+        if (!siteNav.contains(event.target) && !menuButton.contains(event.target)) {
+          closeMenu();
+        }
+      });
+
+      window.addEventListener("resize", function () {
+        if (window.innerWidth > 920) closeMenu();
+      });
+    })();
+  </script>
 </body>
 
 </html>
