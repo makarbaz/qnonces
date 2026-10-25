@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Verify Product | QNONCE</title>
+
+  <meta name="description"
+    content="Verify a QNONCE-powered product using QR-based product authentication and digital product identity." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet" />
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+  <link rel="stylesheet" href="css/website.css" />
+</head>
+
+<body>
+
+  <!-- Header -->
+  <header class="site-header" id="siteHeader">
+    <div class="container header-inner">
+
+      <a href="index.html" class="brand">
+        <span class="brand-mark">
+          <i class="fa-solid fa-shield-halved"></i>
+        </span>
+
+        <span class="brand-text">
+          <strong>QNONCE</strong>
+          <small>Product Authentication</small>
+        </span>
+      </a>
+
+      <nav class="site-nav" id="siteNav">
+        <a href="index.html">Home</a>
+        <a href="what-we-do.html">What We Do</a>
+        <a href="how-it-works.html">How It Works</a>
+        <a href="industries.html">Industries</a>
+        <a href="verify-product.html" class="active">Verify Product</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+
+      <div class="header-actions">
+        <a href="contact.html" class="header-demo-btn">Request Demo</a>
+
+        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <main>
+
+    <!-- Page Hero -->
+    <section class="inner-hero verify-hero">
+      <div class="hero-bg-grid"></div>
+      <div class="hero-light hero-light-one"></div>
+      <div class="hero-light hero-light-two"></div>
+
+      <div class="container inner-hero-grid">
+
+        <div class="inner-hero-content">
+          <div class="hero-badge">
+            <span class="live-dot"></span>
+            Product Verification
+          </div>
+
+          <h1>
+            Check product authenticity with QNONCE verification.
+          </h1>
+
+          <p>
+            QNONCE helps customers confirm whether a product is connected to a secure digital identity.
+            Scan a QR code or enter a verification ID to begin the authenticity check.
+          </p>
+
+          <div class="hero-actions">
+            <a href="#verify-tool" class="primary-btn">
+              Start Verification
+              <i class="fa-solid fa-qrcode"></i>
+            </a>
+
+            <a href="contact.html" class="secondary-btn">
+              Report a Business Need
+              <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+
+        <div class="inner-visual-card verify-visual-card">
+          <div class="verify-phone-mockup">
+            <div class="phone-top"></div>
+
+            <div class="phone-screen">
+              <div class="phone-shield">
+                <i class="fa-solid fa-shield-halved"></i>
+              </div>
+
+              <h3>Authentic Product</h3>
+              <p>Digital product record matched successfully.</p>
+
+              <div class="phone-qr">
+                <span></span>
+                <span></span>
+                <span></span>
+                <strong>QR</strong>
+              </div>
+
+              <div class="phone-status-row">
+                <span>Risk</span>
+                <strong>Low</strong>
+              </div>
+
+              <div class="phone-status-row">
+                <span>Record</span>
+                <strong>Matched</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Verification Tool -->
+    <section class="content-section soft-bg" id="verify-tool">
+      <div class="container verify-tool-grid">
+
+        <div class="verify-tool-content">
+          <span class="section-label">Verification Tool</span>
+          <h2>Enter a QR or product verification ID.</h2>
+          <p>
+            This page is designed for customers who want to check whether a product is genuine.
+            In a live QNONCE deployment, the verification ID is matched with the product’s secure digital record.
+          </p>
+
+          <div class="verify-note">
+            <i class="fa-solid fa-circle-info"></i>
+            <p>
+              Verification is available for QNONCE-enabled products. For preview testing, use <strong>QN-2048-AUTH</strong> or <strong>QR-QNONCE-001</strong>.
+            </p>
+          </div>
+        </div>
+
+        <div class="verify-tool-card">
+          <div class="verify-tool-header">
+            <div>
+              <span>QNONCE Check</span>
+              <h3>Verify Product</h3>
+            </div>
+
+            <i class="fa-solid fa-qrcode"></i>
+          </div>
+
+          <form id="productVerifyForm">
+            <div class="verify-input-group">
+              <label for="verificationId">QR / Product Verification ID</label>
+              <input type="text" id="verificationId" placeholder="Enter QR or Product ID" />
+            </div>
+
+            <button type="submit" class="primary-btn verify-submit-btn">
+              Verify Now
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </form>
+
+          <div class="verification-result-box" id="verificationResultBox">
+            <div class="result-status-icon">
+              <i class="fa-solid fa-shield-halved"></i>
+            </div>
+
+            <div>
+              <h4 id="verificationResultTitle">Ready to Verify</h4>
+              <p id="verificationResultText">
+                Enter a verification ID to check product authenticity.
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Result Meanings -->
+    <section class="content-section">
+      <div class="container">
+
+        <div class="section-heading">
+          <span class="section-label">Verification Results</span>
+          <h2>Clear status signals for customers.</h2>
+          <p>
+            QNONCE verification is designed to be simple, clear, and easy to understand during a customer scan.
+          </p>
+        </div>
+
+        <div class="status-grid">
+
+          <div class="status-card authentic">
+            <i class="fa-solid fa-circle-check"></i>
+            <h3>Authentic</h3>
+            <p>The product record is found and appears valid in the verification system.</p>
+          </div>
+
+          <div class="status-card suspicious">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <h3>Suspicious</h3>
+            <p>The product may need review because of unusual scan or verification signals.</p>
+          </div>
+
+          <div class="status-card blocked">
+            <i class="fa-solid fa-ban"></i>
+            <h3>Blocked</h3>
+            <p>The product identity has been blocked or marked for serious review.</p>
+          </div>
+
+          <div class="status-card missing">
+            <i class="fa-solid fa-circle-question"></i>
+            <h3>Not Found</h3>
+            <p>The QR or product ID is not available in the verification records.</p>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Customer Trust -->
+    <section class="dark-info-section">
+      <div class="container verify-trust-grid">
+
+        <div>
+          <span class="section-label">Customer Trust</span>
+          <h2>Verification should feel simple, fast, and reliable.</h2>
+          <p>
+            Customers should not need technical knowledge to verify a product. QNONCE creates a clean verification
+            experience that helps people understand whether a product is connected to a trusted record.
+          </p>
+        </div>
+
+        <div class="trust-check-list">
+          <div>
+            <i class="fa-solid fa-check"></i>
+            <span>Scan-friendly verification experience</span>
+          </div>
+
+          <div>
+            <i class="fa-solid fa-check"></i>
+            <span>Clear product authenticity status</span>
+          </div>
+
+          <div>
+            <i class="fa-solid fa-check"></i>
+            <span>Customer issue reporting support</span>
+          </div>
+
+          <div>
+            <i class="fa-solid fa-check"></i>
+            <span>Product record visibility for brands</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="home-cta-section">
+      <div class="container home-cta-box">
+
+        <div>
+          <span class="section-label">For Brands</span>
+          <h2>Want QNONCE verification for your products?</h2>
+          <p>
+            Build a secure verification experience that helps customers check product originality and supports your brand protection goals.
+          </p>
+        </div>
+
+        <div class="cta-actions">
+          <a href="contact.html" class="primary-btn">
+            Request Demo
+            <i class="fa-solid fa-arrow-right"></i>
+          </a>
+
+          <a href="what-we-do.html" class="secondary-light-btn">
+            What We Do
+            <i class="fa-solid fa-shield-halved"></i>
+          </a>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container footer-grid">
+
+      <div class="footer-brand">
+        <a href="index.html" class="brand">
+          <span class="brand-mark">
+            <i class="fa-solid fa-shield-halved"></i>
+          </span>
+
+          <span class="brand-text">
+            <strong>QNONCE</strong>
+            <small>Product Authentication</small>
+          </span>
+        </a>
+
+        <p>
+          Product authentication and anti-counterfeit technology for brands, manufacturers, and product-based businesses.
+        </p>
+      </div>
+
+      <div class="footer-links">
+        <h4>Company</h4>
+        <a href="what-we-do.html">What We Do</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+      </div>
+
+      <div class="footer-links">
+        <h4>Solutions</h4>
+        <a href="how-it-works.html">How It Works</a>
+        <a href="industries.html">Industries</a>
+        <a href="verify-product.html">Verify Product</a>
+      </div>
+
+      <div class="footer-links">
+        <h4>Focus</h4>
+        <a href="what-we-do.html">QR Authentication</a>
+        <a href="what-we-do.html">Brand Protection</a>
+        <a href="what-we-do.html">Product Traceability</a>
+      </div>
+
+    </div>
+
+    <div class="container footer-bottom">
+      <p>© 2026 QNONCE. All rights reserved.</p>
+      <span>Protect Every Product. Prove Every Original.</span>
+    </div>
+  </footer>
+
+  <script src="js/website.js"></script>
+</body>
+
+</html>
